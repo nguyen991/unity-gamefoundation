@@ -1,0 +1,157 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8998177290678339948
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e743215d2ee164ae8ab0cfafecbf322f, type: 3}
+  m_Name: Currency_gem
+  m_EditorClassIdentifier: 
+  key: gem
+  display: Gem
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  initBalance: 0
+  maxBalance: 0
+--- !u!114 &-335646823422718617
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e743215d2ee164ae8ab0cfafecbf322f, type: 3}
+  m_Name: Currency_coin
+  m_EditorClassIdentifier: 
+  key: coin
+  display: Coin
+  tags:
+  - soft
+  - currency
+  properties:
+    list:
+    - Key: icon
+      Value:
+        type: 5
+        intValue: 0
+        floatValue: 0
+        stringValue: 
+        boolValue: 0
+        prefabValue: {fileID: 0}
+        spriteValue: {fileID: 21300000, guid: 04981d33457ad4d6394495c6751327dd, type: 3}
+    keyCollision: 0
+  initBalance: 500
+  maxBalance: 5000
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 600ddfdb7726b47adb0851fce7c54d43, type: 3}
+  m_Name: EconomyData
+  m_EditorClassIdentifier: 
+  currencyCatalog:
+    items:
+    - {fileID: -335646823422718617}
+    - {fileID: -8998177290678339948}
+  itemCatalog:
+    items:
+    - {fileID: 5016629054921999076}
+    - {fileID: 7499151745885068698}
+  transactionCatalog:
+    items:
+    - {fileID: 8299546860918830878}
+  storeCatalog:
+    items: []
+--- !u!114 &5016629054921999076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
+  m_Name: Item_item_persistance
+  m_EditorClassIdentifier: 
+  key: item_persistance
+  display: Item_persistance
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  initBalance: 0
+  maxBalance: 0
+  persistent: 1
+  stackable: 0
+  itemPerStack: 0
+--- !u!114 &7499151745885068698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
+  m_Name: Item_item_change
+  m_EditorClassIdentifier: 
+  key: item_change
+  display: Item_change
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  initBalance: 0
+  maxBalance: 100
+  persistent: 0
+  stackable: 1
+  itemPerStack: 1000
+--- !u!114 &8299546860918830878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
+  m_Name: Transaction_coin_gem
+  m_EditorClassIdentifier: 
+  key: coin_gem
+  display: Coin_gem
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  transactionType: 0
+  cost:
+    currencies:
+    - item: {fileID: -335646823422718617}
+      amount: 5000
+    items: []
+    adsId: 
+    productId: 
+  reward:
+    currencies:
+    - item: {fileID: -8998177290678339948}
+      amount: 1
+    items: []
+    adsId: 
+    productId: 
