@@ -20,6 +20,31 @@ MonoBehaviour:
     keyCollision: 0
   initBalance: 0
   maxBalance: 0
+--- !u!114 &-6016172656384296021
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
+  m_Name: Item_unstackable
+  m_EditorClassIdentifier: 
+  key: unstackable
+  display: Unstackable
+  tags:
+  - tag_2
+  - tag_3
+  properties:
+    list: []
+    keyCollision: 0
+  initBalance: 0
+  maxBalance: 5
+  persistent: 0
+  stackable: 0
+  itemPerStack: 0
 --- !u!114 &-335646823422718617
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -69,14 +94,15 @@ MonoBehaviour:
     - {fileID: -8998177290678339948}
   itemCatalog:
     items:
-    - {fileID: 5016629054921999076}
-    - {fileID: 7499151745885068698}
+    - {fileID: 9095505004806910628}
+    - {fileID: 4470823697860650160}
+    - {fileID: -6016172656384296021}
   transactionCatalog:
     items:
     - {fileID: 8299546860918830878}
   storeCatalog:
     items: []
---- !u!114 &5016629054921999076
+--- !u!114 &4470823697860650160
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -86,42 +112,30 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
-  m_Name: Item_item_persistance
+  m_Name: Item_stackable
   m_EditorClassIdentifier: 
-  key: item_persistance
-  display: Item_persistance
-  tags: []
+  key: stackable
+  display: Stackable
+  tags:
+  - tag_1
+  - tag_2
   properties:
-    list: []
-    keyCollision: 0
-  initBalance: 0
-  maxBalance: 0
-  persistent: 1
-  stackable: 0
-  itemPerStack: 0
---- !u!114 &7499151745885068698
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
-  m_Name: Item_item_change
-  m_EditorClassIdentifier: 
-  key: item_change
-  display: Item_change
-  tags: []
-  properties:
-    list: []
+    list:
+    - Key: 
+      Value:
+        type: 0
+        intValue: 0
+        floatValue: 0
+        stringValue: 
+        boolValue: 0
+        prefabValue: {fileID: 0}
+        spriteValue: {fileID: 0}
     keyCollision: 0
   initBalance: 0
   maxBalance: 100
   persistent: 0
   stackable: 1
-  itemPerStack: 1000
+  itemPerStack: 20
 --- !u!114 &8299546860918830878
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,3 +169,27 @@ MonoBehaviour:
     items: []
     adsId: 
     productId: 
+--- !u!114 &9095505004806910628
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eee39b2d7cf2d4cd981fbdf08b21a830, type: 3}
+  m_Name: Item_immutable
+  m_EditorClassIdentifier: 
+  key: immutable
+  display: Immutable
+  tags:
+  - tag_1
+  properties:
+    list: []
+    keyCollision: 0
+  initBalance: 0
+  maxBalance: 0
+  persistent: 1
+  stackable: 0
+  itemPerStack: 0

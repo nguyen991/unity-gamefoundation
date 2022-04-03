@@ -70,7 +70,7 @@ namespace GameFoundation.Economy
             // consume cost inventory
             foreach (var cost in transaction.cost.items)
             {
-                inventory.RemoveRange(cost.item.key, (int)cost.amount);
+                inventory.Remove(cost.item.key, cost.amount);
             }
 
             // add reward currency
@@ -83,8 +83,7 @@ namespace GameFoundation.Economy
             // add reward inventory
             foreach (var reward in transaction.reward.items)
             {
-                //TODO: update here
-                // inventory.CreateRange(reward.item.key, (int)reward.amount);
+                inventory.Create(reward.item.key, reward.amount);
                 result.items.Add(new TransactionItem<Item>() { item = reward.item, amount = reward.amount });
             }
 

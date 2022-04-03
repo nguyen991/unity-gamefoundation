@@ -2,23 +2,24 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using GameFoundation.Utilities;
 
 namespace GameFoundation.Economy
 {
     public class InventoryManager
     {
-        protected class ItemInstance
+        public class ItemInstance
         {
+            public string key;
             public string id;
             public long amount;
-            public GenericDictionary<string, Property> properties;
+            public GenericDictionary<string, Property> properties = new GenericDictionary<string, Property>();
         }
 
         [System.Serializable]
         protected class ItemData
         {
             [System.NonSerialized] public Item item;
-            public string key;
             public List<ItemInstance> instances;
         }
 
@@ -31,40 +32,41 @@ namespace GameFoundation.Economy
             this.catalog = catalog;
             this.items = new Dictionary<string, ItemData>();
 
-            //TODO: load currencies data from persistent storage
+            //TODO: load inventory data from persistent storage
 
             // init new items
             catalog.items.ForEach(item =>
             {
                 if (!items.ContainsKey(item.key))
                 {
+                    // add item data
                     items.Add(item.key, new ItemData()
                     {
                         item = item,
-                        key = item.key,
                         instances = new List<ItemInstance>()
                     });
 
                     // add init balance
                     if (item.initBalance > 0)
                     {
-
+                        Create(item.key, item.initBalance);
                     }
                 }
             });
         }
 
-        public void Create(string key, long amount = 1)
+        public List<ItemInstance> Create(string key, long amount = 1)
         {
             var item = Find(key);
             if (item != null)
             {
                 // check limit amount
                 var total = TotalAmount(key);
-                if ((item.persistent && total > 0) ||
+                if ((item.persistent && (amount > 1 || total > 0)) ||
                     (item.maxBalance > 0 && total >= item.maxBalance))
                 {
-                    return;
+                    Debug.LogError($"Create item [{key}] amount [{amount}] failed, meet limit");
+                    return null;
                 }
 
                 // limit amount
@@ -95,63 +97,85 @@ namespace GameFoundation.Economy
                     // geneate new stacks
                     if (amount > 0)
                     {
-                        var itemPerStack = amount / item.itemPerStack;
+                        var stacks = amount / item.itemPerStack;
                         var remain = amount % item.itemPerStack;
-                        if (itemPerStack > 0)
+
+                        // create stacks
+                        if (stacks > 0)
                         {
-                            newInstance = new int[amount].Select(i => new ItemInstance() { id = GenrateUUID(), amount = (long)itemPerStack }).ToList();
+                            newInstance.AddRange(stacks.Range().Select(_ => new ItemInstance() { key = key, id = GenrateUUID(), amount = item.itemPerStack }));
                         }
 
-                        // generate remain stack
+                        // create remain stack
                         if (remain > 0)
                         {
-                            newInstance.Add(new ItemInstance() { id = GenrateUUID(), amount = (long)itemPerStack });
+                            newInstance.Add(new ItemInstance() { key = key, id = GenrateUUID(), amount = remain });
                         }
                     }
                 }
                 else
                 {
-                    newInstance = new int[amount].Select(i => new ItemInstance() { id = GenrateUUID(), amount = (long)1 }).ToList();
+                    newInstance = amount.Range().Select(_ => new ItemInstance() { key = key, id = GenrateUUID(), amount = 1 }).ToList();
                 }
 
                 // create a new item
                 items[key].instances.AddRange(newInstance);
+                return newInstance;
             }
+            return null;
         }
 
-        public bool Remove(string id)
+        public bool Remove(string key, long amount)
         {
-            if (items.TryGetValue(id, out ItemData data))
+            if (items.TryGetValue(key, out ItemData data))
             {
-                if (data.item.persistent)
+                if (data.item.persistent || TotalAmount(key) < amount)
                 {
                     return false;
                 }
 
-                // remove item by id
-                items.Remove(id);
+                // sub items
+                data.instances.ForEach(instance =>
+                {
+                    if (amount > 0)
+                    {
+                        if (instance.amount >= amount)
+                        {
+                            instance.amount -= amount;
+                            amount = 0;
+                        }
+                        else
+                        {
+                            amount -= instance.amount;
+                            instance.amount = 0;
+                        }
+                    }
+                });
+
+                // remove empty items
+                data.instances.RemoveAll(instance => instance.amount == 0);
 
                 return true;
             }
             return false;
         }
 
-        public void RemoveRange(string key, int amount)
+        public bool RemoveById(string id, long amount)
         {
-            var ids = items.Where(x => x.Value.item.key == key).Select(x => x.Key).Take(amount).ToList();
-            foreach (var id in ids)
+            // find instance by id
+            var instance = items.Values.SelectMany(item => item.instances).FirstOrDefault(instance => instance.id == id);
+            if (instance != null && instance.amount >= amount)
             {
-                Remove(id);
-            }
-        }
+                instance.amount -= amount;
 
-        public void RemoveAll(string key)
-        {
-            var ids = items.Where(x => x.Value.item.key == key).Select(x => x.Key).ToArray();
-            foreach (var id in ids)
-            {
-                Remove(id);
+                // remove instance if empty
+                if (instance.amount == 0)
+                {
+                    items[instance.key].instances.Remove(instance);
+                }
+                return true;
             }
+            return false;
         }
 
         public long TotalAmount(string key)
@@ -162,6 +186,22 @@ namespace GameFoundation.Economy
         public Item Find(string key)
         {
             return catalog.Find(key);
+        }
+
+        public IEnumerable<ItemInstance> Query(
+            ICollection<string> keys = null,
+            ICollection<string> tags = null,
+            ICollection<string> properties = null,
+            ICollection<string> customProperties = null
+        )
+        {
+            return items
+                .Where(item =>
+                    (keys == null || keys.Contains(item.Key)) &&
+                    (tags == null || tags.Any(tag => item.Value.item.IsHaveTag(tag))) &&
+                    (properties == null || properties.Any(prop => item.Value.item.IsHaveProperty(prop))))
+                .SelectMany(item => item.Value.instances)
+                .Where(item => (customProperties == null || customProperties.All(prop => item.properties.ContainsKey(prop))));
         }
 
         private string GenrateUUID()

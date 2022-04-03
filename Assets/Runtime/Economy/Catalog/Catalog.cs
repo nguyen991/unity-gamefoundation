@@ -16,6 +16,11 @@ namespace GameFoundation.Economy
         {
             return tags.Contains(tag);
         }
+
+        public bool IsHaveProperty(string prop)
+        {
+            return properties.ContainsKey(prop);
+        }
     }
 
     public class Catalog<T> where T : CatalogItem

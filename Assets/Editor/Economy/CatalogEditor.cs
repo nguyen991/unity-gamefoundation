@@ -138,6 +138,13 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
         }
 
+        // int tags = 0;
+        // private void DrawTags()
+        // {
+        //     string[] options = new string[] { "tag_1", "tag_2", "tag_3" };
+        //     tags = EditorGUILayout.MaskField("Tags", tags, options);
+        // }
+
         protected virtual void DrawCustomItemData()
         {
         }

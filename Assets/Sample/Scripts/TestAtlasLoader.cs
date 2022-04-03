@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
@@ -38,16 +39,19 @@ public class TestAtlasLoader : MonoBehaviour
 
         // test inventory
         Debug.Log("------------ Test Inventory ------------");
-        // // var itemId = EconomyManager.Instance.Inventory.Create("item_persistance");
-        // Debug.Log("Create persistance item: " + itemId);
-        // Debug.Log("Amount persistance item: " + EconomyManager.Instance.Inventory.TotalAmount("item_persistance"));
-        // Debug.Log("Remove persistance item: " + EconomyManager.Instance.Inventory.Remove(itemId));
-        // EconomyManager.Instance.Inventory.RemoveRange("item_persistance", 1);
-        // Debug.Log("Remove Range:");
-        // Debug.Log("Amount persistance item: " + EconomyManager.Instance.Inventory.TotalAmount("item_persistance"));
+        var items = EconomyManager.Instance.Inventory.Create("immutable", 1);
+        Debug.Log("Create immutable instances: " + items?.Count);
 
-        // itemId = EconomyManager.Instance.Inventory.Create("item_persistance");
-        // Debug.Log("Create more persistance item: " + itemId);
+        items = EconomyManager.Instance.Inventory.Create("stackable", 30);
+        Debug.Log($"Create stackable instances: {items?.Count}, amount: {EconomyManager.Instance.Inventory.TotalAmount("stackable")}");
+        items = EconomyManager.Instance.Inventory.Create("stackable", 130);
+        Debug.Log($"Create stackable instances: {items?.Count}, amount: {EconomyManager.Instance.Inventory.TotalAmount("stackable")}");
+
+        items = EconomyManager.Instance.Inventory.Create("unstackable", 10);
+        Debug.Log($"Create unstackable instances: {items?.Count}, amount: {EconomyManager.Instance.Inventory.TotalAmount("unstackable")}");
+
+        var queryCount = EconomyManager.Instance.Inventory.Query(tags: new string[] { "tag_1" }).Count();
+        Debug.Log($"Query stackable instances: {queryCount}");
 
         // test transaction
         Debug.Log("------------ Test Transaction ------------");

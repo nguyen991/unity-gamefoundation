@@ -1,6 +1,8 @@
 {
     "files.exclude":
     {
+        "*.csproj":true,
+        "*.sln": true,
         "**/.DS_Store":true,
         "**/.git":true,
         "**/.gitignore":true,
@@ -42,7 +44,7 @@
         "**/*.mat":true,
         "**/*.meta":true,
         "**/*.prefab":true,
-        "**/*.unity":true,
+        "**/*.unity":true,        
         "build/":true,
         "Build/":true,
         "Library/":true,
@@ -51,7 +53,9 @@
         "Obj/":true,
         "ProjectSettings/":true,
         "temp/":true,
-        "Temp/":true
+        "Temp/":true,
+        "UserSettings/":true,
+        "Logs/":true,
     },
     "editor.formatOnSave": true
 }

@@ -13,17 +13,6 @@ namespace GameFoundation.Utilities
             return collection.ElementAt(index);
         }
 
-        public static ICollection<T> Range<T>(this ICollection<T> collection, int size, int start = 0)
-        {
-            collection.Clear();
-            var end = start + size;
-            for (var i = start; i < end; i++)
-            {
-                collection.Add(default(T));
-            }
-            return collection;
-        }
-
         public static IList<T> Shuffle<T>(this IList<T> list)
         {
             int n = list.Count;
