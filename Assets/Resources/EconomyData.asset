@@ -20,6 +20,35 @@ MonoBehaviour:
     keyCollision: 0
   initBalance: 0
   maxBalance: 0
+--- !u!114 &-8144874491225709002
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
+  m_Name: Transaction_ads_transation
+  m_EditorClassIdentifier: 
+  key: ads_transation
+  display: Ads Transation
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  transactionType: 0
+  cost:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
+  reward:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
 --- !u!114 &-6016172656384296021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -99,9 +128,69 @@ MonoBehaviour:
     - {fileID: -6016172656384296021}
   transactionCatalog:
     items:
-    - {fileID: 8299546860918830878}
+    - {fileID: 382000017016326160}
+    - {fileID: -8144874491225709002}
+    - {fileID: 3291861044389490590}
   storeCatalog:
     items: []
+--- !u!114 &382000017016326160
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
+  m_Name: Transaction_virual_transaction
+  m_EditorClassIdentifier: 
+  key: virual_transaction
+  display: Virual Transaction
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  transactionType: 0
+  cost:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
+  reward:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
+--- !u!114 &3291861044389490590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
+  m_Name: Transaction_iap_transaction
+  m_EditorClassIdentifier: 
+  key: iap_transaction
+  display: Iap Transaction
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  transactionType: 0
+  cost:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
+  reward:
+    currencies: []
+    items: []
+    adsId: 
+    productId: 
 --- !u!114 &4470823697860650160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136,39 +225,6 @@ MonoBehaviour:
   persistent: 0
   stackable: 1
   itemPerStack: 20
---- !u!114 &8299546860918830878
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
-  m_Name: Transaction_coin_gem
-  m_EditorClassIdentifier: 
-  key: coin_gem
-  display: Coin_gem
-  tags: []
-  properties:
-    list: []
-    keyCollision: 0
-  transactionType: 0
-  cost:
-    currencies:
-    - item: {fileID: -335646823422718617}
-      amount: 5000
-    items: []
-    adsId: 
-    productId: 
-  reward:
-    currencies:
-    - item: {fileID: -8998177290678339948}
-      amount: 1
-    items: []
-    adsId: 
-    productId: 
 --- !u!114 &9095505004806910628
 MonoBehaviour:
   m_ObjectHideFlags: 0

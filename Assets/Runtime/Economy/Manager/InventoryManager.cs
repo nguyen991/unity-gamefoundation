@@ -13,7 +13,7 @@ namespace GameFoundation.Economy
             public string key;
             public string id;
             public long amount;
-            public GenericDictionary<string, Property> properties = new GenericDictionary<string, Property>();
+            public Dictionary<string, object> data = new Dictionary<string, object>();
         }
 
         [System.Serializable]
@@ -192,7 +192,7 @@ namespace GameFoundation.Economy
             ICollection<string> keys = null,
             ICollection<string> tags = null,
             ICollection<string> properties = null,
-            ICollection<string> customProperties = null
+            ICollection<string> data = null
         )
         {
             return items
@@ -201,7 +201,7 @@ namespace GameFoundation.Economy
                     (tags == null || tags.Any(tag => item.Value.item.IsHaveTag(tag))) &&
                     (properties == null || properties.Any(prop => item.Value.item.IsHaveProperty(prop))))
                 .SelectMany(item => item.Value.instances)
-                .Where(item => (customProperties == null || customProperties.All(prop => item.properties.ContainsKey(prop))));
+                .Where(item => (data == null || data.All(prop => item.data.ContainsKey(prop))));
         }
 
         private string GenrateUUID()

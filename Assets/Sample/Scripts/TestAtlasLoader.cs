@@ -49,13 +49,21 @@ public class TestAtlasLoader : MonoBehaviour
 
         items = EconomyManager.Instance.Inventory.Create("unstackable", 10);
         Debug.Log($"Create unstackable instances: {items?.Count}, amount: {EconomyManager.Instance.Inventory.TotalAmount("unstackable")}");
+        items.ForEach(item =>
+        {
+            item.data.Add("bag", "main");
+        });
+        items[0].data.Remove("bag");
 
         var queryCount = EconomyManager.Instance.Inventory.Query(tags: new string[] { "tag_1" }).Count();
-        Debug.Log($"Query stackable instances: {queryCount}");
+        Debug.Log($"Query instances with tag: {queryCount}");
+
+        queryCount = EconomyManager.Instance.Inventory.Query(data: new string[] { "bag" }).Count();
+        Debug.Log($"Query instances with data: {queryCount}");
 
         // test transaction
         Debug.Log("------------ Test Transaction ------------");
-        var result = EconomyManager.Instance.Transaction.BeginTransaction("coin_gem");
+        var result = await EconomyManager.Instance.Transaction.BeginTransaction("coin_gem");
         if (result != null)
         {
             Debug.Log("Coins: " + EconomyManager.Instance.Wallet.Get("coin"));
@@ -65,5 +73,18 @@ public class TestAtlasLoader : MonoBehaviour
                 Debug.Log("Reward: " + rw.item.display + "-" + rw.amount);
             });
         }
+
+        // test ad
+        GameFoundation.Mobile.AdController.Instance.Init();
+        await UniTask.WaitUntil(() => GameFoundation.Mobile.AdController.Instance.Initialized);
+
+        // Debug.Log("------------ Test ShowInterstitial Ad ------------");
+        // GameFoundation.Mobile.AdController.Instance.ShowInterstitial();
+
+        Debug.Log("------------ Test ShoReward Ad ------------");
+        GameFoundation.Mobile.AdController.Instance.ShowReward((success) =>
+        {
+            Debug.Log("ShowReward: " + success);
+        });
     }
 }

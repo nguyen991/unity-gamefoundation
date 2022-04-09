@@ -1,6 +1,12 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using GameFoundation.Mobile;
+using Cysharp.Threading.Tasks;
+
+#if GF_IAP
+using UnityEngine.Purchasing;
+#endif
 
 namespace GameFoundation.Economy
 {
@@ -17,7 +23,7 @@ namespace GameFoundation.Economy
             this.inventory = inventory;
         }
 
-        public TransactionData BeginTransaction(string key)
+        public async UniTask<TransactionData> BeginTransaction(string key)
         {
             var transaction = catalog.Find(key);
             if (transaction != null)
@@ -30,10 +36,10 @@ namespace GameFoundation.Economy
                         success = VirtualTransaction(transaction, result);
                         break;
                     case Transaction.TransactionType.Ads:
-                        AdsTransaction();
+                        success = await AdsTransaction(transaction, result);
                         break;
                     case Transaction.TransactionType.IAP:
-                        IapProductTransaction();
+                        success = await IapProductTransaction(transaction, result);
                         break;
                 }
                 return success ? result : null;
@@ -73,6 +79,34 @@ namespace GameFoundation.Economy
                 inventory.Remove(cost.item.key, cost.amount);
             }
 
+            // add reward
+            AddReward(transaction, result);
+
+            return true;
+        }
+
+        public async UniTask<bool> IapProductTransaction(Transaction transaction, TransactionData result)
+        {
+            await UniTask.NextFrame();
+            return false;
+        }
+
+        public async UniTask<bool> AdsTransaction(Transaction transaction, TransactionData result)
+        {
+            var task = new UniTaskCompletionSource<bool>();
+            AdController.Instance.ShowReward((success) => task.TrySetResult(success));
+            var success = await task.Task;
+
+            if (success)
+            {
+                AddReward(transaction, result);
+                return true;
+            }
+            return false;
+        }
+
+        private void AddReward(Transaction transaction, TransactionData result)
+        {
             // add reward currency
             foreach (var reward in transaction.reward.currencies)
             {
@@ -86,16 +120,43 @@ namespace GameFoundation.Economy
                 inventory.Create(reward.item.key, reward.amount);
                 result.items.Add(new TransactionItem<Item>() { item = reward.item, amount = reward.amount });
             }
-
-            return true;
         }
 
-        public void IapProductTransaction()
+#if GF_IAP
+        private class IAPManager : IStoreListener
         {
-        }
+            private IStoreController controller;
+            private IExtensionProvider extensions;
 
-        public void AdsTransaction()
-        {
+            public void Initialize()
+            {
+                var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
+                UnityPurchasing.Initialize(this, builder);
+            }
+
+            public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
+            {
+                this.controller = controller;
+                this.extensions = extensions;
+                Debug.Log("[IAPManager] Initialized");
+            }
+
+            public void OnInitializeFailed(InitializationFailureReason error)
+            {
+                Debug.Log("[IAPManager] Initialize failed: " + error.ToString());
+            }
+
+            public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
+            {
+                Debug.Log("[IAPManager] Purchase failed: " + product.definition.id + " - " + failureReason.ToString());
+            }
+
+            public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
+            {
+                Debug.Log("[IAPManager] Process purchase: " + purchaseEvent.purchasedProduct.definition.id);
+                return PurchaseProcessingResult.Complete;
+            }
         }
+#endif
     }
 }

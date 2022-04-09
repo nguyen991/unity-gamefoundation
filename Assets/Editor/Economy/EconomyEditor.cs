@@ -29,7 +29,20 @@ namespace GameFoundation.Editor.Economy
             economyData = EditorGUILayout.ObjectField("Economy Data", economyData, typeof(EconomyData), false) as EconomyData;
             if (economyData == null)
             {
-                return;
+                // search in resource folder
+                var guids = AssetDatabase.FindAssets("t:EconomyData");
+                if (guids.Length > 0)
+                {
+                    var path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                    economyData = AssetDatabase.LoadAssetAtPath<EconomyData>(path);
+                }
+                else
+                {
+                    // create new asset
+                    economyData = ScriptableObject.CreateInstance<EconomyData>();
+                    AssetDatabase.CreateAsset(economyData, "Assets/Resources/EconomyData.asset");
+                    AssetDatabase.SaveAssets();
+                }
             }
 
             selectedTab = GUILayout.Toolbar(selectedTab, Tabs);

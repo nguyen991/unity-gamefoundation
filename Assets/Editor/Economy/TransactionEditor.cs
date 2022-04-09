@@ -43,9 +43,11 @@ namespace GameFoundation.Editor.Economy
             switch (selectedItem.transactionType)
             {
                 case Transaction.TransactionType.Ads:
+                    GUILayout.Space(EditorGUIUtility.singleLineHeight);
                     selectedItem.cost.adsId = EditorGUILayout.TextField("Ads ID:", selectedItem.cost.adsId);
                     break;
                 case Transaction.TransactionType.IAP:
+                    GUILayout.Space(EditorGUIUtility.singleLineHeight);
                     selectedItem.cost.productId = EditorGUILayout.TextField("Product ID:", selectedItem.cost.productId);
                     break;
                 default:
