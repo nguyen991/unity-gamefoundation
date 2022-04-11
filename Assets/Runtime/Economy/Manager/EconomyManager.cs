@@ -15,7 +15,7 @@ namespace GameFoundation.Economy
         public TransactionManager Transaction { get; private set; } = null;
         public StoreManager Store { get; private set; } = null;
 
-        private void Start()
+        public void Init()
         {
             Wallet = new WalletManager(economyData.currencyCatalog);
             Inventory = new InventoryManager(economyData.itemCatalog);

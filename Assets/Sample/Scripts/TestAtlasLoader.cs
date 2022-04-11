@@ -12,12 +12,8 @@ public class TestAtlasLoader : MonoBehaviour
 {
     public Image image;
 
-    private async UniTaskVoid Start()
+    public async void Run()
     {
-        // preload
-        await UniTask.WaitUntil(() => SpriteLoader.Instance.IsLoaded);
-        await UniTask.WaitUntil(() => EconomyManager.Instance.Intialized);
-
         // get sprite
         var sprite = await SpriteLoader.Instance.GetSprite("Tiles/block_14.png");
         image.sprite = sprite;
@@ -74,17 +70,14 @@ public class TestAtlasLoader : MonoBehaviour
             });
         }
 
-        // test ad
-        GameFoundation.Mobile.AdController.Instance.Init();
-        await UniTask.WaitUntil(() => GameFoundation.Mobile.AdController.Instance.Initialized);
+        // test ads
+        Debug.Log("------------ Test ShowInterstitial Ad ------------");
+        GameFoundation.Mobile.AdController.Instance.ShowInterstitial();
 
-        // Debug.Log("------------ Test ShowInterstitial Ad ------------");
-        // GameFoundation.Mobile.AdController.Instance.ShowInterstitial();
-
-        Debug.Log("------------ Test ShoReward Ad ------------");
-        GameFoundation.Mobile.AdController.Instance.ShowReward((success) =>
-        {
-            Debug.Log("ShowReward: " + success);
-        });
+        // Debug.Log("------------ Test ShoReward Ad ------------");
+        // GameFoundation.Mobile.AdController.Instance.ShowReward((success) =>
+        // {
+        //     Debug.Log("ShowReward: " + success);
+        // });
     }
 }

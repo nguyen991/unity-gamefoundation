@@ -17,8 +17,13 @@ namespace GameFoundation.Addressable
 
         private IList<SpriteAtlas> spriteAtlas = null;
 
-        private async UniTaskVoid Start()
+        public async UniTask Init()
         {
+            if (IsLoaded)
+            {
+                return;
+            }
+
             try
             {
                 if (spriteAtlasLabels.Count > 0)

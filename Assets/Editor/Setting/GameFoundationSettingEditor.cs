@@ -113,6 +113,24 @@ namespace GameFoundation.Editor
                 setting.enableIap = value;
             }
 
+            EditorGUILayout.Space(10f);
+
+            EditorGUILayout.LabelField("Dotween", EditorStyles.boldLabel);
+            value = EditorGUILayout.Toggle("Enable Dotween", setting.enableDotween);
+            if (value != setting.enableDotween)
+            {
+                if (value)
+                {
+                    AddSymbol("UNITASK_DOTWEEN_SUPPORT ", targetGroups);
+                }
+                else
+                {
+                    RemoveSymbol("UNITASK_DOTWEEN_SUPPORT ", targetGroups);
+                }
+                modified = true;
+                setting.enableDotween = value;
+            }
+
             EditorGUILayout.Space(15f);
             if (GUILayout.Button("Apply Change"))
             {

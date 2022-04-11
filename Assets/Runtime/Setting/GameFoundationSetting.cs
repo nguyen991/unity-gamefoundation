@@ -11,5 +11,6 @@ namespace GameFoundation
         [ReadOnly] public bool enableAds = false;
         [ReadOnly] public bool enableAnalytics = false;
         [ReadOnly] public bool enableIap = false;
+        [ReadOnly] public bool enableDotween = false;
     }
 }
