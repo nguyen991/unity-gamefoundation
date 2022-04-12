@@ -11,7 +11,7 @@ namespace GameFoundation.State
     {
         public abstract void ChangeState(object ID);
 
-        public T GetModel<T>() where T : BaseModel
+        public T GetModel<T>() where T : UniRxModel
         {
             return GetComponent<StateModel<T>>().Model;
         }
