@@ -59,7 +59,7 @@ public class TestAtlasLoader : MonoBehaviour
 
         // test transaction
         Debug.Log("------------ Test Transaction ------------");
-        var result = await EconomyManager.Instance.Transaction.BeginTransaction("coin_gem");
+        var result = await EconomyManager.Instance.Transaction.BeginTransaction("virual_transaction");
         if (result != null)
         {
             Debug.Log("Coins: " + EconomyManager.Instance.Wallet.Get("coin"));
@@ -69,15 +69,54 @@ public class TestAtlasLoader : MonoBehaviour
                 Debug.Log("Reward: " + rw.item.display + "-" + rw.amount);
             });
         }
+        else
+        {
+            Debug.LogError("Transaction virual_transaction error");
+        }
+
+        result = await EconomyManager.Instance.Transaction.BeginTransaction("ads_transation");
+        if (result != null)
+        {
+            Debug.Log("Coins: " + EconomyManager.Instance.Wallet.Get("coin"));
+            Debug.Log("Gems: " + EconomyManager.Instance.Wallet.Get("gem"));
+            result.currencies.ForEach(rw =>
+            {
+                Debug.Log("Reward: " + rw.item.display + "-" + rw.amount);
+            });
+        }
+        else
+        {
+            Debug.LogError("Transaction ads_transation error");
+        }
 
         // test ads
-        Debug.Log("------------ Test ShowInterstitial Ad ------------");
-        GameFoundation.Mobile.AdController.Instance.ShowInterstitial();
+        // Debug.Log("------------ Test ShowInterstitial Ad ------------");
+        // GameFoundation.Mobile.AdController.Instance.ShowInterstitial();
 
         // Debug.Log("------------ Test ShoReward Ad ------------");
         // GameFoundation.Mobile.AdController.Instance.ShowReward((success) =>
         // {
         //     Debug.Log("ShowReward: " + success);
         // });
+    }
+
+    public async void IAPTest()
+    {
+        Debug.Log("Price " + EconomyManager.Instance.Transaction.Get("iap_transaction").cost.product.metadata.localizedPriceString);
+
+        var result = await EconomyManager.Instance.Transaction.BeginTransaction("iap_transaction");
+        if (result != null)
+        {
+            Debug.Log("Coins: " + EconomyManager.Instance.Wallet.Get("coin"));
+            Debug.Log("Gems: " + EconomyManager.Instance.Wallet.Get("gem"));
+            result.currencies.ForEach(rw =>
+            {
+                Debug.Log("Reward: " + rw.item.display + "-" + rw.amount);
+            });
+        }
+        else
+        {
+            Debug.LogWarning("Transaction iap_transaction error");
+        }
     }
 }

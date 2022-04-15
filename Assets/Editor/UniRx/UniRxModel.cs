@@ -8,8 +8,7 @@ namespace GameFoundation.Editor
 {
     public class UniRxModel
     {
-
-        [MenuItem("Game Foundation/Model/Clear Save")]
+        [MenuItem("Game Foundation/Model/Clear Save", false)]
         public static void RemoveAllFile()
         {
             if (EditorUtility.DisplayDialog("Delete", $"Are you sure you want to delete all save file?", "Yes", "No"))
@@ -26,7 +25,7 @@ namespace GameFoundation.Editor
             }
         }
 
-        [MenuItem("Game Foundation/Model/Log Save Path")]
+        [MenuItem("Game Foundation/Model/Log Save Path", false)]
         public static void LogSavePath()
         {
             Debug.Log(Application.persistentDataPath);

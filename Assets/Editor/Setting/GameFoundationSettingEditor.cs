@@ -17,7 +17,7 @@ namespace GameFoundation.Editor
             BuildTargetGroup.iOS,
         };
 
-        [MenuItem("Game Foundation/Setting")]
+        [MenuItem("Game Foundation/Setting", false, 0)]
         public static void ShowWindow()
         {
             var window = EditorWindow.GetWindow(typeof(GameFoundationSettingEditor));
@@ -121,11 +121,11 @@ namespace GameFoundation.Editor
             {
                 if (value)
                 {
-                    AddSymbol("UNITASK_DOTWEEN_SUPPORT ", targetGroups);
+                    AddSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroups);
                 }
                 else
                 {
-                    RemoveSymbol("UNITASK_DOTWEEN_SUPPORT ", targetGroups);
+                    RemoveSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroups);
                 }
                 modified = true;
                 setting.enableDotween = value;

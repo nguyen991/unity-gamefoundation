@@ -19,7 +19,7 @@ namespace GameFoundation.Economy
         {
             Wallet = new WalletManager(economyData.currencyCatalog);
             Inventory = new InventoryManager(economyData.itemCatalog);
-            Transaction = new TransactionManager(economyData.transactionCatalog, Wallet, Inventory);
+            Transaction = new TransactionManager(gameObject, economyData.transactionCatalog, Wallet, Inventory);
             Store = new StoreManager(economyData.storeCatalog);
             Intialized = true;
         }

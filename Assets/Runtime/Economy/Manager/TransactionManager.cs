@@ -16,11 +16,46 @@ namespace GameFoundation.Economy
         private WalletManager wallet;
         private InventoryManager inventory;
 
-        public TransactionManager(TransactionCatalog catalog, WalletManager wallet, InventoryManager inventory)
+        private UniTaskCompletionSource<bool> iapTask;
+
+#if GF_IAP
+        private IAPListener iapListener;
+#endif
+
+        public TransactionManager(GameObject parent, TransactionCatalog catalog, WalletManager wallet, InventoryManager inventory)
         {
             this.catalog = catalog;
             this.wallet = wallet;
             this.inventory = inventory;
+
+#if GF_IAP
+            // initialize IAP Listener
+            iapListener = new IAPListener();
+            iapListener.onIntialized = OnPurchaseIntialized;
+            iapListener.onPurchaseComplete = OnPurchaseComplete;
+            iapListener.onPurchaseFailed = OnPurchaseFailed;
+            iapListener.Init();
+#endif
+        }
+
+        public Transaction Get(string key)
+        {
+            return catalog.Find(key);
+        }
+
+        public bool IsOwnedIAPProduct(string productId)
+        {
+#if GF_IAP
+            var product = iapListener.GetProduct(productId);
+            return product != null ? product.hasReceipt : false;
+#else
+            return false;
+#endif
+        }
+
+        public void RestoreIAP()
+        {
+            iapListener.Restore();
         }
 
         public async UniTask<TransactionData> BeginTransaction(string key)
@@ -85,18 +120,56 @@ namespace GameFoundation.Economy
             return true;
         }
 
-        public async UniTask<bool> IapProductTransaction(Transaction transaction, TransactionData result)
+        private async UniTask<bool> IapProductTransaction(Transaction transaction, TransactionData result)
         {
-            await UniTask.NextFrame();
+            iapTask = new UniTaskCompletionSource<bool>();
+#if GF_IAP
+            iapListener.Purchase(transaction.cost.productId);
+#else
+            iapTask.TrySetResult(true);
+#endif
+            var success = await iapTask.Task;
+            if (success)
+            {
+                AddReward(transaction, result);
+                return true;
+            }
             return false;
         }
 
-        public async UniTask<bool> AdsTransaction(Transaction transaction, TransactionData result)
+#if GF_IAP
+        private void OnPurchaseIntialized(bool result)
+        {
+            Debug.Log($"Purchase initialized: {result}");
+
+            // populate iap product
+            catalog.items.ForEach(item =>
+            {
+                if (item.transactionType == Transaction.TransactionType.IAP && !string.IsNullOrEmpty(item.cost.productId))
+                {
+                    item.cost.product = iapListener.GetProduct(item.cost.productId);
+                }
+            });
+        }
+
+        private void OnPurchaseComplete(Product product)
+        {
+            Debug.Log($"Purchase success: {product.definition.id}");
+            iapTask?.TrySetResult(true);
+        }
+
+        private void OnPurchaseFailed(Product product, PurchaseFailureReason error)
+        {
+            Debug.Log($"Purchase failed: {product.definition.id} - {error.ToString()}");
+            iapTask?.TrySetResult(false);
+        }
+#endif
+
+        private async UniTask<bool> AdsTransaction(Transaction transaction, TransactionData result)
         {
             var task = new UniTaskCompletionSource<bool>();
             AdController.Instance.ShowReward((success) => task.TrySetResult(success));
             var success = await task.Task;
-
             if (success)
             {
                 AddReward(transaction, result);
@@ -121,42 +194,5 @@ namespace GameFoundation.Economy
                 result.items.Add(new TransactionItem<Item>() { item = reward.item, amount = reward.amount });
             }
         }
-
-#if GF_IAP
-        private class IAPManager : IStoreListener
-        {
-            private IStoreController controller;
-            private IExtensionProvider extensions;
-
-            public void Initialize()
-            {
-                var builder = ConfigurationBuilder.Instance(StandardPurchasingModule.Instance());
-                UnityPurchasing.Initialize(this, builder);
-            }
-
-            public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
-            {
-                this.controller = controller;
-                this.extensions = extensions;
-                Debug.Log("[IAPManager] Initialized");
-            }
-
-            public void OnInitializeFailed(InitializationFailureReason error)
-            {
-                Debug.Log("[IAPManager] Initialize failed: " + error.ToString());
-            }
-
-            public void OnPurchaseFailed(Product product, PurchaseFailureReason failureReason)
-            {
-                Debug.Log("[IAPManager] Purchase failed: " + product.definition.id + " - " + failureReason.ToString());
-            }
-
-            public PurchaseProcessingResult ProcessPurchase(PurchaseEventArgs purchaseEvent)
-            {
-                Debug.Log("[IAPManager] Process purchase: " + purchaseEvent.purchasedProduct.definition.id);
-                return PurchaseProcessingResult.Complete;
-            }
-        }
-#endif
     }
 }

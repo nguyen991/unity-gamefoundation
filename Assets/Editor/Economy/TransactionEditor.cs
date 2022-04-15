@@ -6,6 +6,10 @@ using UnityEngine.Events;
 using UnityEditor;
 using GameFoundation.Economy;
 
+#if GF_IAP
+using UnityEngine.Purchasing;
+#endif
+
 namespace GameFoundation.Editor.Economy
 {
     public class TransactionEditor : CatalogEditor<Transaction>
@@ -33,7 +37,6 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
 
             EditorGUILayout.EndHorizontal();
-
         }
 
         private void DrawCost()
@@ -44,11 +47,11 @@ namespace GameFoundation.Editor.Economy
             {
                 case Transaction.TransactionType.Ads:
                     GUILayout.Space(EditorGUIUtility.singleLineHeight);
-                    selectedItem.cost.adsId = EditorGUILayout.TextField("Ads ID:", selectedItem.cost.adsId);
+                    // selectedItem.cost.adsId = EditorGUILayout.TextField("Ads ID:", selectedItem.cost.adsId);
+                    EditorGUILayout.LabelField("Rewarded Ad");
                     break;
                 case Transaction.TransactionType.IAP:
-                    GUILayout.Space(EditorGUIUtility.singleLineHeight);
-                    selectedItem.cost.productId = EditorGUILayout.TextField("Product ID:", selectedItem.cost.productId);
+                    DrawIAPCost();
                     break;
                 default:
                     DrawVirtualCost();
@@ -78,6 +81,30 @@ namespace GameFoundation.Editor.Economy
                     selectedItem.cost.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
                 }
             );
+        }
+
+        private void DrawIAPCost()
+        {
+            GUILayout.Space(EditorGUIUtility.singleLineHeight);
+            selectedItem.cost.productId = EditorGUILayout.TextField("Product Id:", selectedItem.cost.productId);
+            GUILayout.Space(EditorGUIUtility.singleLineHeight);
+
+#if GF_IAP
+            // find product in catalog
+            var catalog = ProductCatalog.LoadDefaultCatalog().allValidProducts.FirstOrDefault(c => c.id == selectedItem.cost.productId);
+            if (catalog != null)
+            {
+                GUILayout.Label("Product Detail:", EditorStyles.boldLabel);
+                GUILayout.Label($"{catalog.id}");
+                GUILayout.Label($"{catalog.type.ToString()}");
+            }
+            else
+            {
+                GUILayout.Label("Invalid Product Id", EditorStyles.boldLabel);
+            }
+#else
+            GUILayout.Label("IAP feature not yet enabled", EditorStyles.boldLabel);
+#endif
         }
 
         private void DrawReward()
@@ -127,7 +154,11 @@ namespace GameFoundation.Editor.Economy
             {
                 PopupWindow.Show(buttonRect, new SelectItemPopup<T>(
                     selections.Where(s => !items.Exists(it => it.item.key == s.key)).ToList(),
-                    onSelectItem)
+                    (T value) =>
+                    {
+                        onSelectItem.Invoke(value);
+                        SaveAsset();
+                    })
                 );
             }
             EditorGUILayout.EndHorizontal();
@@ -136,6 +167,16 @@ namespace GameFoundation.Editor.Economy
             if (deleteItem != null)
             {
                 items.Remove(deleteItem);
+                SaveAsset();
+            }
+        }
+
+        private void SaveAsset()
+        {
+            if (selectedItem != null)
+            {
+                EditorUtility.SetDirty(selectedItem);
+                AssetDatabase.SaveAssets();
             }
         }
     }

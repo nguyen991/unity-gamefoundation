@@ -16,7 +16,7 @@ namespace GameFoundation.Editor.Economy
         private TransactionEditor transactionEditor = new TransactionEditor();
         private StoreEditor storeEditor = new StoreEditor();
 
-        [MenuItem("Game Foundation/Economy/Editor")]
+        [MenuItem("Game Foundation/Economy/Editor", false, 21)]
         public static void ShowWindow()
         {
             var window = EditorWindow.GetWindow(typeof(EconomyEditor));

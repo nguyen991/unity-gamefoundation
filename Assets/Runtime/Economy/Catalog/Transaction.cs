@@ -2,6 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+#if GF_IAP
+using UnityEngine.Purchasing;
+#endif
+
 namespace GameFoundation.Economy
 {
     [System.Serializable]
@@ -18,6 +22,10 @@ namespace GameFoundation.Economy
         public List<TransactionItem<Item>> items = new List<TransactionItem<Item>>();
         public string adsId;
         public string productId;
+
+#if GF_IAP
+        [System.NonSerialized] public Product product;
+#endif
     }
 
     [System.Serializable]

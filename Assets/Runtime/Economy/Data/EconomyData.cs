@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace GameFoundation.Economy
 {
-    [CreateAssetMenu(fileName = "EconomyData", menuName = "Game Foundation/Economy/Data", order = 1)]
+    [CreateAssetMenu(fileName = "EconomyData", menuName = "Game Foundation/Economy/Data")]
     public class EconomyData : ScriptableObject
     {
         [HideInInspector] public CurrencyCatalog currencyCatalog;

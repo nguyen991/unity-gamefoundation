@@ -173,9 +173,9 @@ namespace GameFoundation.Editor.Economy
 
                 // update asset database
                 AssetDatabase.AddObjectToAsset(item, economyData);
-                AssetDatabase.SaveAssets();
                 EditorUtility.SetDirty(economyData);
                 EditorUtility.SetDirty(item);
+                AssetDatabase.SaveAssets();
 
                 newKey = "";
                 OnSelectItem(item);
