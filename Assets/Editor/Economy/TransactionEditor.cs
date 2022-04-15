@@ -37,6 +37,11 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
 
             EditorGUILayout.EndHorizontal();
+
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(selectedItem);
+            }
         }
 
         private void DrawCost()
@@ -46,9 +51,7 @@ namespace GameFoundation.Editor.Economy
             switch (selectedItem.transactionType)
             {
                 case Transaction.TransactionType.Ads:
-                    GUILayout.Space(EditorGUIUtility.singleLineHeight);
-                    // selectedItem.cost.adsId = EditorGUILayout.TextField("Ads ID:", selectedItem.cost.adsId);
-                    EditorGUILayout.LabelField("Rewarded Ad");
+                    DrawAdsCost();
                     break;
                 case Transaction.TransactionType.IAP:
                     DrawIAPCost();
@@ -81,6 +84,12 @@ namespace GameFoundation.Editor.Economy
                     selectedItem.cost.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
                 }
             );
+        }
+
+        private void DrawAdsCost()
+        {
+            GUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Rewarded Ad");
         }
 
         private void DrawIAPCost()

@@ -51,47 +51,6 @@ MonoBehaviour:
     items: []
     adsId: 
     productId: 
---- !u!114 &-7451962997507578979
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5b829cf84bea4492aa711760d1325084, type: 3}
-  m_Name: Transaction_test
-  m_EditorClassIdentifier: 
-  key: test
-  display: Test
-  tags:
-  - gagaag
-  properties:
-    list:
-    - Key: haha
-      Value:
-        type: 1
-        intValue: 0
-        floatValue: 20
-        stringValue: 
-        boolValue: 0
-        prefabValue: {fileID: 0}
-        spriteValue: {fileID: 0}
-    keyCollision: 0
-  transactionType: 1
-  cost:
-    currencies: []
-    items: []
-    adsId: 
-    productId: com.test.iap
-  reward:
-    currencies:
-    - item: {fileID: -335646823422718617}
-      amount: 10
-    items: []
-    adsId: 
-    productId: 
 --- !u!114 &-6016172656384296021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -174,7 +133,6 @@ MonoBehaviour:
     - {fileID: 382000017016326160}
     - {fileID: -8144874491225709002}
     - {fileID: 3291861044389490590}
-    - {fileID: -7451962997507578979}
   storeCatalog:
     items: []
 --- !u!114 &382000017016326160
@@ -228,14 +186,16 @@ MonoBehaviour:
   properties:
     list: []
     keyCollision: 0
-  transactionType: 0
+  transactionType: 1
   cost:
     currencies: []
     items: []
     adsId: 
-    productId: 
+    productId: com.test.iap
   reward:
-    currencies: []
+    currencies:
+    - item: {fileID: -8998177290678339948}
+      amount: 10
     items: []
     adsId: 
     productId: 
