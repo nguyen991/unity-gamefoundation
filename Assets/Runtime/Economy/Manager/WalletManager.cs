@@ -1,5 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using Newtonsoft.Json;
 using UnityEngine;
 
 namespace GameFoundation.Economy
@@ -10,20 +12,17 @@ namespace GameFoundation.Economy
         protected class CurrencyData
         {
             [System.NonSerialized] public Currency currency;
-            public string key;
             public long balance;
         }
 
         private CurrencyCatalog catalog;
 
-        private Dictionary<string, CurrencyData> currencies;
+        [JsonProperty] private Dictionary<string, CurrencyData> currencies;
 
         public WalletManager(CurrencyCatalog catalog)
         {
             this.catalog = catalog;
             this.currencies = new Dictionary<string, CurrencyData>();
-
-            //TODO: load currencies data from persistent storage
 
             // init new currencies
             catalog.items.ForEach(currency =>
@@ -73,6 +72,24 @@ namespace GameFoundation.Economy
         public Currency Find(string key)
         {
             return catalog.Find(key);
+        }
+
+        [OnDeserialized]
+        internal void OnDeserialized(StreamingContext context)
+        {
+            Debug.Log("OnDeserialized");
+            // init new currencies
+            catalog.items.ForEach(currency =>
+            {
+                if (!currencies.ContainsKey(currency.key))
+                {
+                    currencies.Add(currency.key, new CurrencyData()
+                    {
+                        currency = currency,
+                        balance = currency.initBalance
+                    });
+                }
+            });
         }
     }
 }

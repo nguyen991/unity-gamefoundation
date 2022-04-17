@@ -11,15 +11,15 @@ namespace GameFoundation.Addressable
 {
     public class SpriteLoader : Utilities.SingletonBehaviour<SpriteLoader>
     {
-        [SerializeField] private List<AssetLabelReference> spriteAtlasLabels;
+        public List<AssetLabelReference> spriteAtlasLabels;
 
-        public bool IsLoaded { get; private set; } = false;
+        public bool Initialized { get; private set; } = false;
 
         private IList<SpriteAtlas> spriteAtlas = null;
 
         public async UniTask Init()
         {
-            if (IsLoaded)
+            if (Initialized)
             {
                 return;
             }
@@ -37,7 +37,7 @@ namespace GameFoundation.Addressable
             }
             finally
             {
-                IsLoaded = true;
+                Initialized = true;
             }
         }
 

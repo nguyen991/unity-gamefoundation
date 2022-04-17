@@ -31,25 +31,6 @@ namespace GameFoundation.Mobile
                 this.doubleValue = parameterValue;
             }
 
-#if GF_ANALYTICS && (UNITY_ANDROID || UNITY_IOS)
-            public Firebase.Analytics.Parameter ToFirebaseParam()
-            {
-                if (stringValue != null)
-                {
-                    return new Firebase.Analytics.Parameter(name, stringValue);
-                }
-                if (longValue != null)
-                {
-                    return new Firebase.Analytics.Parameter(name, (long)longValue);
-                }
-                if (doubleValue != null)
-                {
-                    return new Firebase.Analytics.Parameter(name, (double)doubleValue);
-                }
-                return null;
-            }
-#endif
-
             public override string ToString()
             {
                 if (stringValue != null)
@@ -70,22 +51,7 @@ namespace GameFoundation.Mobile
 
         public static void Log(string eventName, params Parameter[] parameters)
         {
-#if GF_ANALYTICS && (UNITY_ANDROID || UNITY_IOS)
-            var fb_params = new List<Firebase.Analytics.Parameter>();
-            var ap_params = new Dictionary<string, string>();
-
-            foreach (var value in parameters)
-            {
-                fb_params.Add(value.ToFirebaseParam());
-                ap_params.Add(value.name, value.ToString());
-            }
-
-            // AppsFlyer
-            AppsFlyerSDK.AppsFlyer.sendEvent(eventName, ap_params);
-
-            // Firebase
-            Firebase.Analytics.FirebaseAnalytics.LogEvent(eventName, fb_params.ToArray());
-#endif
+            FirebaseInstance.Log(eventName, parameters);
         }
     }
 }

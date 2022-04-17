@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 
-namespace UniRx.Model
+namespace GameFoundation.Model
 {
-    public abstract class UniRxModel
+    public abstract class GFModel
     {
         public string Name { get; set; } = "";
 
         public string FileName { get; set; } = "";
 
-        public UniRxModel(string name = "")
+        public GFModel(string name = "")
         {
             Name = string.IsNullOrEmpty(name) ? GetType().ToString() : name;
             FileName = Name + ".dat";

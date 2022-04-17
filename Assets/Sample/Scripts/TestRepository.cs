@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using UniRx.Model;
+using GameFoundation.Model;
 using UnityEngine;
 using UnityEngine.UI;
 

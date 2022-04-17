@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using UniRx.Model;
 using UnityEngine;
 
 namespace GameFoundation.State
@@ -11,7 +10,7 @@ namespace GameFoundation.State
     {
         public abstract void ChangeState(object ID);
 
-        public T GetModel<T>() where T : UniRxModel
+        public T GetModel<T>() where T : Model.GFModel
         {
             return GetComponent<StateModel<T>>().Model;
         }

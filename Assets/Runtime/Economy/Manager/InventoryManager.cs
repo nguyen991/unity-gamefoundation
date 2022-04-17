@@ -3,11 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using GameFoundation.Utilities;
+using Newtonsoft.Json;
 
 namespace GameFoundation.Economy
 {
     public class InventoryManager
     {
+        [System.Serializable]
         public class ItemInstance
         {
             public string key;
@@ -25,7 +27,7 @@ namespace GameFoundation.Economy
 
         private ItemCatalog catalog;
 
-        private Dictionary<string, ItemData> items;
+        [JsonProperty] private Dictionary<string, ItemData> items;
 
         public InventoryManager(ItemCatalog catalog)
         {

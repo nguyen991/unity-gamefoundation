@@ -19,6 +19,10 @@ public class TestAtlasLoader : MonoBehaviour
         image.sprite = sprite;
         image.SetNativeSize();
 
+        // test pool
+        await Pooling.Instance.Reload();
+        await Pooling.Instance.Take("cube", transform);
+
         // test wallet
         Debug.Log("------------ Test Wallet ------------");
         Debug.Log("Coin Initialize: " + EconomyManager.Instance.Wallet.Get("coin"));
@@ -118,5 +122,27 @@ public class TestAtlasLoader : MonoBehaviour
         {
             Debug.LogWarning("Transaction iap_transaction error");
         }
+    }
+
+    public void Save()
+    {
+        EconomyManager.Instance.Save();
+    }
+
+    public void Load()
+    {
+        EconomyManager.Instance.Load();
+    }
+
+    public void Log()
+    {
+        Debug.Log("Coins: " + EconomyManager.Instance.Wallet.Get("coin"));
+        Debug.Log("Gems: " + EconomyManager.Instance.Wallet.Get("gem"));
+
+        var queryCount = EconomyManager.Instance.Inventory.Query(tags: new string[] { "tag_1" }).Count();
+        Debug.Log($"Query instances with tag: {queryCount}");
+
+        queryCount = EconomyManager.Instance.Inventory.Query(data: new string[] { "bag" }).Count();
+        Debug.Log($"Query instances with data: {queryCount}");
     }
 }

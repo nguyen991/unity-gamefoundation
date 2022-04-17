@@ -20,7 +20,7 @@ namespace GameFoundation.Pool
             return pools.Select(p => p.id).Distinct().Count() == pools.Count;
         }
 
-        public async UniTask Preload()
+        public async UniTask Reload()
         {
             await UniTask.WhenAll(pools.Select(p => p.Reload(transform)));
         }
@@ -34,8 +34,8 @@ namespace GameFoundation.Pool
             }
             var node = await pool.Take<T>();
             node.transform.parent = parent;
-            node.gameObject.SetActive(true);
             node.SendMessage(MethodOnTake, SendMessageOptions.DontRequireReceiver);
+            node.gameObject.SetActive(true);
             return node;
         }
 
@@ -55,8 +55,8 @@ namespace GameFoundation.Pool
             var pool = pools.Find(p => p.id == id);
             if (pool != null)
             {
-                node.SendMessage(MethodOnReturn, SendMessageOptions.DontRequireReceiver);
                 node.gameObject.SetActive(false);
+                node.SendMessage(MethodOnReturn, SendMessageOptions.DontRequireReceiver);
                 node.parent = transform;
                 pool.Return(node.gameObject);
             }

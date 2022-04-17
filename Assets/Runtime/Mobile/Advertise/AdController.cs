@@ -46,6 +46,11 @@ namespace GameFoundation.Mobile
 
         public void Init()
         {
+            if (Initialized)
+            {
+                return;
+            }
+
 #if UNITY_EDITOR
             if (useAdFakeOnEditor)
             {
