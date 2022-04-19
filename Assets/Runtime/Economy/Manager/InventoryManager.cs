@@ -37,7 +37,7 @@ namespace GameFoundation.Economy
             //TODO: load inventory data from persistent storage
 
             // init new items
-            catalog.items.ForEach(item =>
+            catalog.Items.ForEach(item =>
             {
                 if (!items.ContainsKey(item.key))
                 {

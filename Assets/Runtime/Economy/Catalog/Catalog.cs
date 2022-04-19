@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GameFoundation.Economy
@@ -25,16 +26,18 @@ namespace GameFoundation.Economy
 
     public class Catalog<T> where T : CatalogItem
     {
-        public List<T> items = new List<T>();
+        [SerializeField] protected List<T> items = new List<T>();
 
         public bool IsHaveKey(string key)
         {
-            return items.Find(item => item.key == key) != null;
+            return Items.Find(item => item.key == key) != null;
         }
 
         public T Find(string key)
         {
-            return items.Find(item => item.key == key);
+            return Items.Find(item => item.key == key);
         }
+
+        public List<T> Items => items;
     }
 }

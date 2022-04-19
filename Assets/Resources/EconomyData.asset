@@ -51,6 +51,27 @@ MonoBehaviour:
     items: []
     adsId: 
     productId: 
+--- !u!114 &-7005304904987302397
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d4b52011288bd4d76b91c1fc0dd66b5f, type: 3}
+  m_Name: Store_mini
+  m_EditorClassIdentifier: 
+  key: mini
+  display: Mini
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  transactions:
+  - {fileID: -8144874491225709002}
+  - {fileID: 3291861044389490590}
 --- !u!114 &-6016172656384296021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -134,7 +155,8 @@ MonoBehaviour:
     - {fileID: -8144874491225709002}
     - {fileID: 3291861044389490590}
   storeCatalog:
-    items: []
+    items:
+    - {fileID: -7005304904987302397}
 --- !u!114 &382000017016326160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -165,7 +187,9 @@ MonoBehaviour:
     currencies:
     - item: {fileID: -8998177290678339948}
       amount: 1
-    items: []
+    items:
+    - item: {fileID: 0}
+      amount: 1
     adsId: 
     productId: 
 --- !u!114 &3291861044389490590

@@ -8,7 +8,17 @@ namespace GameFoundation.Economy
     public class Store : CatalogItem
     {
         [Header("Data")]
-        public List<Transaction> transactions = new List<Transaction>();
+        [SerializeField]
+        protected List<Transaction> transactions = new List<Transaction>();
+
+        public List<Transaction> Transactions
+        {
+            get
+            {
+                transactions.RemoveAll(t => t == null);
+                return transactions;
+            }
+        }
     }
 
     [System.Serializable]

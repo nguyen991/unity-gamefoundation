@@ -25,7 +25,7 @@ namespace GameFoundation.Economy
             this.currencies = new Dictionary<string, CurrencyData>();
 
             // init new currencies
-            catalog.items.ForEach(currency =>
+            catalog.Items.ForEach(currency =>
             {
                 if (!currencies.ContainsKey(currency.key))
                 {
@@ -79,7 +79,7 @@ namespace GameFoundation.Economy
         {
             Debug.Log("OnDeserialized");
             // init new currencies
-            catalog.items.ForEach(currency =>
+            catalog.Items.ForEach(currency =>
             {
                 if (!currencies.ContainsKey(currency.key))
                 {

@@ -19,7 +19,6 @@ namespace GameFoundation.Editor
         };
 
         private bool featureFoldout = true;
-        private bool configFoldout = true;
 
         [MenuItem("Game Foundation/Setting", false, 0)]
         public static void ShowWindow()

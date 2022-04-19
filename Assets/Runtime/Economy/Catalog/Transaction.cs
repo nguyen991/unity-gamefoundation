@@ -40,8 +40,28 @@ namespace GameFoundation.Economy
 
         [Header("Data")]
         public TransactionType transactionType;
-        public TransactionData cost;
-        public TransactionData reward;
+        [SerializeField] protected TransactionData cost;
+        [SerializeField] protected TransactionData reward;
+
+        public TransactionData Cost
+        {
+            get
+            {
+                cost.currencies.RemoveAll(c => c.item == null);
+                cost.items.RemoveAll(i => i.item == null);
+                return cost;
+            }
+        }
+
+        public TransactionData Reward
+        {
+            get
+            {
+                reward.currencies.RemoveAll(c => c.item == null);
+                reward.items.RemoveAll(i => i.item == null);
+                return reward;
+            }
+        }
     }
 
     [System.Serializable]

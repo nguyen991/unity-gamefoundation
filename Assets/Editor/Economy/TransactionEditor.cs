@@ -67,21 +67,21 @@ namespace GameFoundation.Editor.Economy
         {
             DrawTransactionItems<Currency>(
                 "Currencies:",
-                selectedItem.cost.currencies,
-                economyData.currencyCatalog.items,
+                selectedItem.Cost.currencies,
+                economyData.currencyCatalog.Items,
                 (item) =>
                 {
-                    selectedItem.cost.currencies.Add(new TransactionItem<Currency>() { item = item, amount = 1 });
+                    selectedItem.Cost.currencies.Add(new TransactionItem<Currency>() { item = item, amount = 1 });
                 }
             );
             GUILayout.Space(10f);
             DrawTransactionItems<Item>(
                 "Items:",
-                selectedItem.cost.items,
-                economyData.itemCatalog.items,
+                selectedItem.Cost.items,
+                economyData.itemCatalog.Items,
                 (item) =>
                 {
-                    selectedItem.cost.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
+                    selectedItem.Cost.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
                 }
             );
         }
@@ -95,12 +95,12 @@ namespace GameFoundation.Editor.Economy
         private void DrawIAPCost()
         {
             GUILayout.Space(EditorGUIUtility.singleLineHeight);
-            selectedItem.cost.productId = EditorGUILayout.TextField("Product Id:", selectedItem.cost.productId);
+            selectedItem.Cost.productId = EditorGUILayout.TextField("Product Id:", selectedItem.Cost.productId);
             GUILayout.Space(EditorGUIUtility.singleLineHeight);
 
 #if GF_IAP
             // find product in catalog
-            var catalog = ProductCatalog.LoadDefaultCatalog().allValidProducts.FirstOrDefault(c => c.id == selectedItem.cost.productId);
+            var catalog = ProductCatalog.LoadDefaultCatalog().allValidProducts.FirstOrDefault(c => c.id == selectedItem.Cost.productId);
             if (catalog != null)
             {
                 GUILayout.Label("Product Detail:", EditorStyles.boldLabel);
@@ -120,21 +120,21 @@ namespace GameFoundation.Editor.Economy
         {
             DrawTransactionItems<Currency>(
                 "Currencies:",
-                selectedItem.reward.currencies,
-                economyData.currencyCatalog.items,
+                selectedItem.Reward.currencies,
+                economyData.currencyCatalog.Items,
                 (item) =>
                 {
-                    selectedItem.reward.currencies.Add(new TransactionItem<Currency>() { item = item, amount = 1 });
+                    selectedItem.Reward.currencies.Add(new TransactionItem<Currency>() { item = item, amount = 1 });
                 }
             );
             GUILayout.Space(10f);
             DrawTransactionItems<Item>(
                 "Items:",
-                selectedItem.reward.items,
-                economyData.itemCatalog.items,
+                selectedItem.Reward.items,
+                economyData.itemCatalog.Items,
                 (item) =>
                 {
-                    selectedItem.reward.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
+                    selectedItem.Reward.items.Add(new TransactionItem<Item>() { item = item, amount = 1 });
                 }
             );
         }

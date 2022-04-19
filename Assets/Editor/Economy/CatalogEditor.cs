@@ -70,7 +70,7 @@ namespace GameFoundation.Editor.Economy
             GUILayout.Space(5f);
 
             // list
-            catalog.items
+            catalog.Items
                 .Where(item => item.key.Contains(searchString))
                 .ToList()
                 .ForEach(item =>
@@ -99,7 +99,7 @@ namespace GameFoundation.Editor.Economy
             // delete item
             if (deleteItem)
             {
-                catalog.items.Remove(deleteItem);
+                catalog.Items.Remove(deleteItem);
                 AssetDatabase.RemoveObjectFromAsset(deleteItem);
                 Undo.DestroyObjectImmediate(deleteItem);
                 AssetDatabase.SaveAssets();
@@ -124,6 +124,7 @@ namespace GameFoundation.Editor.Economy
             EditorGUILayout.TextField("Key", selectedItem.key);
             selectedItem.display = EditorGUILayout.TextField("Display", selectedItem.display);
             EditorGUILayout.PropertyField(new SerializedObject(selectedItem).FindProperty("tags"), true);
+            // DrawTags();
             EditorGUILayout.PropertyField(new SerializedObject(selectedItem).FindProperty("properties"), true);
             GUILayout.EndVertical();
 
@@ -138,11 +139,21 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
         }
 
-        // int tags = 0;
         // private void DrawTags()
         // {
-        //     string[] options = new string[] { "tag_1", "tag_2", "tag_3" };
-        //     tags = EditorGUILayout.MaskField("Tags", tags, options);
+        //     GUILayout.BeginHorizontal();
+        //     selectedItem.tags.ForEach(tag =>
+        //     {
+        //         GUILayout.BeginHorizontal(GUILayout.Width(100));
+        //         GUILayout.Label(tag);
+        //         if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
+        //         {
+        //             // selectedItem.tags.Remove(tag);
+        //             Debug.Log("Remove Tag " + tag);
+        //         }
+        //         GUILayout.EndHorizontal();
+        //     });
+        //     GUILayout.EndHorizontal();
         // }
 
         protected virtual void DrawCustomItemData()
@@ -169,7 +180,7 @@ namespace GameFoundation.Editor.Economy
                 item.name = $"{title}_{newKey}";
                 item.key = newKey;
                 item.display = newKey[0].ToString().ToUpper() + newKey.Substring(1);
-                catalog.items.Add(item);
+                catalog.Items.Add(item);
 
                 // update asset database
                 AssetDatabase.AddObjectToAsset(item, economyData);

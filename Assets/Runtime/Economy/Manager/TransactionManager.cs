@@ -91,7 +91,7 @@ namespace GameFoundation.Economy
         private bool VirtualTransaction(Transaction transaction, TransactionData result)
         {
             // check cost currency
-            foreach (var cost in transaction.cost.currencies)
+            foreach (var cost in transaction.Cost.currencies)
             {
                 if (wallet.Get(cost.item.key) < cost.amount)
                 {
@@ -100,7 +100,7 @@ namespace GameFoundation.Economy
             }
 
             // check cost inventory
-            foreach (var cost in transaction.cost.items)
+            foreach (var cost in transaction.Cost.items)
             {
                 if (inventory.TotalAmount(cost.item.key) < cost.amount)
                 {
@@ -109,13 +109,13 @@ namespace GameFoundation.Economy
             }
 
             // consume cost currency
-            foreach (var cost in transaction.cost.currencies)
+            foreach (var cost in transaction.Cost.currencies)
             {
                 wallet.Add(cost.item.key, -cost.amount);
             }
 
             // consume cost inventory
-            foreach (var cost in transaction.cost.items)
+            foreach (var cost in transaction.Cost.items)
             {
                 inventory.Remove(cost.item.key, cost.amount);
             }
@@ -130,7 +130,7 @@ namespace GameFoundation.Economy
         {
             iapTask = new UniTaskCompletionSource<bool>();
 #if GF_IAP
-            iapListener.Purchase(transaction.cost.productId);
+            iapListener.Purchase(transaction.Cost.productId);
 #else
             iapTask.TrySetResult(true);
 #endif
@@ -149,11 +149,11 @@ namespace GameFoundation.Economy
             Debug.Log($"Purchase initialized: {result}");
 
             // populate iap product
-            catalog.items.ForEach(item =>
+            catalog.Items.ForEach(item =>
             {
-                if (item.transactionType == Transaction.TransactionType.IAP && !string.IsNullOrEmpty(item.cost.productId))
+                if (item.transactionType == Transaction.TransactionType.IAP && !string.IsNullOrEmpty(item.Cost.productId))
                 {
-                    item.cost.product = iapListener.GetProduct(item.cost.productId);
+                    item.Cost.product = iapListener.GetProduct(item.Cost.productId);
                 }
             });
         }
@@ -187,14 +187,14 @@ namespace GameFoundation.Economy
         private void AddReward(Transaction transaction, TransactionData result)
         {
             // add reward currency
-            foreach (var reward in transaction.reward.currencies)
+            foreach (var reward in transaction.Reward.currencies)
             {
                 wallet.Add(reward.item.key, reward.amount);
                 result.currencies.Add(new TransactionItem<Currency>() { item = reward.item, amount = reward.amount });
             }
 
             // add reward inventory
-            foreach (var reward in transaction.reward.items)
+            foreach (var reward in transaction.Reward.items)
             {
                 inventory.Create(reward.item.key, reward.amount);
                 result.items.Add(new TransactionItem<Item>() { item = reward.item, amount = reward.amount });

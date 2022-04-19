@@ -41,6 +41,11 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
 
             EditorGUILayout.EndHorizontal();
+
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(selectedItem);
+            }
         }
 
         protected override void OnSelectItem(Store item)
@@ -58,7 +63,7 @@ namespace GameFoundation.Editor.Economy
                 transactionList = new ReorderableList(serializedObject, serializedObject.FindProperty("transactions"), true, false, false, true);
                 transactionList.drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
-                    var item = selectedItem.transactions[index];
+                    var item = selectedItem.Transactions[index];
                     EditorGUI.LabelField(rect, item.display);
                 };
             }
@@ -89,15 +94,15 @@ namespace GameFoundation.Editor.Economy
             GUILayout.Space(5f);
 
             // list
-            economyData.transactionCatalog.items
-                .Where(item => item.key.Contains(searchTransaction) && !selectedItem.transactions.Exists(t => t.key == item.key))
+            economyData.transactionCatalog.Items
+                .Where(item => item.key.Contains(searchTransaction) && !selectedItem.Transactions.Exists(t => t.key == item.key))
                 .ToList()
                 .ForEach(item =>
             {
                 GUILayout.BeginHorizontal("HelpBox");
                 if (GUILayout.Button(EditorGUIUtility.IconContent("d_tab_prev"), GUILayout.Width(30f)))
                 {
-                    selectedItem.transactions.Add(item);
+                    selectedItem.Transactions.Add(item);
                 }
                 GUILayout.Label(item.display);
                 GUILayout.EndHorizontal();
