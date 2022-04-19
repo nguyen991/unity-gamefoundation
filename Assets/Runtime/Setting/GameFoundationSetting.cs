@@ -12,7 +12,5 @@ namespace GameFoundation
         [ReadOnly] public bool enableFirebase = false;
         [ReadOnly] public bool enableIap = false;
         [ReadOnly] public bool enableDotween = false;
-
-        public Data.DataLayer.DataLayerType dataLayerType = Data.DataLayer.DataLayerType.Persistence;
     }
 }

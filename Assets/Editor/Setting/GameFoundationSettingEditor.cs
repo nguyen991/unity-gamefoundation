@@ -18,8 +18,8 @@ namespace GameFoundation.Editor
             BuildTargetGroup.iOS,
         };
 
-        private bool featureFoldout = false;
-        private bool configFoldout = false;
+        private bool featureFoldout = true;
+        private bool configFoldout = true;
 
         [MenuItem("Game Foundation/Setting", false, 0)]
         public static void ShowWindow()
@@ -61,7 +61,6 @@ namespace GameFoundation.Editor
         private void Draw()
         {
             EditorGUILayout.BeginVertical("GroupBox");
-            DrawConfig();
             DrawFeature();
             EditorGUILayout.EndVertical();
             if (GUI.changed)
@@ -70,24 +69,12 @@ namespace GameFoundation.Editor
                 AssetDatabase.SaveAssetIfDirty(setting);
             }
         }
-
-        private void DrawConfig()
-        {
-            configFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(configFoldout, "Config");
-            if (configFoldout)
-            {
-                EditorGUILayout.LabelField("Data Layer", EditorStyles.boldLabel);
-                setting.dataLayerType = (Data.DataLayer.DataLayerType)EditorGUILayout.EnumPopup("Data Layer Type", setting.dataLayerType);
-            }
-            EditorGUI.EndFoldoutHeaderGroup();
-        }
-
         private void DrawFeature()
         {
             featureFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(featureFoldout, "Features");
             if (featureFoldout)
             {
-
+                EditorGUILayout.BeginVertical("HelpBox");
                 EditorGUILayout.LabelField("Advertise", EditorStyles.boldLabel);
 
                 var value = EditorGUILayout.Toggle("Enable Admob", setting.enableAds);
@@ -105,7 +92,7 @@ namespace GameFoundation.Editor
                     setting.enableAds = value;
                 }
 
-                EditorGUILayout.Space(10f);
+                EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
 
                 EditorGUILayout.LabelField("Analytics", EditorStyles.boldLabel);
                 value = EditorGUILayout.Toggle("Enable Firebase", setting.enableFirebase);
@@ -122,7 +109,7 @@ namespace GameFoundation.Editor
                     setting.enableFirebase = value;
                 }
 
-                EditorGUILayout.Space(10f);
+                EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
 
                 EditorGUILayout.LabelField("In-App Purchasing", EditorStyles.boldLabel);
                 value = EditorGUILayout.Toggle("Enable IAP", setting.enableIap);
@@ -139,7 +126,7 @@ namespace GameFoundation.Editor
                     setting.enableIap = value;
                 }
 
-                EditorGUILayout.Space(10f);
+                EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
 
                 EditorGUILayout.LabelField("Dotween", EditorStyles.boldLabel);
                 value = EditorGUILayout.Toggle("Enable Dotween", setting.enableDotween);
@@ -156,11 +143,12 @@ namespace GameFoundation.Editor
                     setting.enableDotween = value;
                 }
 
-                EditorGUILayout.Space(15f);
+                EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
                 if (GUILayout.Button("Apply Change"))
                 {
                     CompilationPipeline.RequestScriptCompilation();
                 }
+                EditorGUILayout.EndVertical();
             }
             EditorGUI.EndFoldoutHeaderGroup();
         }
