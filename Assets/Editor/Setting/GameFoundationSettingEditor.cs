@@ -10,12 +10,16 @@ namespace GameFoundation.Editor
     public class GameFoundationSettingEditor : EditorWindow
     {
         private GameFoundationSetting setting = null;
-        private List<BuildTargetGroup> targetGroups = new List<BuildTargetGroup>()
+        private List<BuildTargetGroup> targetGroup = new List<BuildTargetGroup>()
         {
             BuildTargetGroup.Standalone,
+            BuildTargetGroup.WebGL,
             BuildTargetGroup.Android,
             BuildTargetGroup.iOS,
         };
+
+        private bool featureFoldout = false;
+        private bool configFoldout = false;
 
         [MenuItem("Game Foundation/Setting", false, 0)]
         public static void ShowWindow()
@@ -56,94 +60,109 @@ namespace GameFoundation.Editor
 
         private void Draw()
         {
-            EditorGUILayout.BeginVertical();
-
-            EditorGUILayout.LabelField("Advertise", EditorStyles.boldLabel);
-
-            var modified = false;
-            var value = EditorGUILayout.Toggle("Enable Admob", setting.enableAds);
-
-            if (value != setting.enableAds)
-            {
-                if (value)
-                {
-                    AddSymbol("GF_ADS", targetGroups);
-                }
-                else
-                {
-                    RemoveSymbol("GF_ADS", targetGroups);
-                }
-                modified = true;
-                setting.enableAds = value;
-            }
-
-            EditorGUILayout.Space(10f);
-
-            EditorGUILayout.LabelField("Firebase Analytics", EditorStyles.boldLabel);
-            value = EditorGUILayout.Toggle("Enable Analytics", setting.enableAnalytics);
-            if (value != setting.enableAnalytics)
-            {
-                if (value)
-                {
-                    AddSymbol("GF_ANALYTICS", targetGroups);
-                }
-                else
-                {
-                    RemoveSymbol("GF_ANALYTICS", targetGroups);
-                }
-                modified = true;
-                setting.enableAnalytics = value;
-            }
-
-            EditorGUILayout.Space(10f);
-
-            EditorGUILayout.LabelField("In-App Purchasing", EditorStyles.boldLabel);
-            value = EditorGUILayout.Toggle("Enable IAP", setting.enableIap);
-            if (value != setting.enableIap)
-            {
-                if (value)
-                {
-                    AddSymbol("GF_IAP", targetGroups);
-                }
-                else
-                {
-                    RemoveSymbol("GF_IAP", targetGroups);
-                }
-                modified = true;
-                setting.enableIap = value;
-            }
-
-            EditorGUILayout.Space(10f);
-
-            EditorGUILayout.LabelField("Dotween", EditorStyles.boldLabel);
-            value = EditorGUILayout.Toggle("Enable Dotween", setting.enableDotween);
-            if (value != setting.enableDotween)
-            {
-                if (value)
-                {
-                    AddSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroups);
-                }
-                else
-                {
-                    RemoveSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroups);
-                }
-                modified = true;
-                setting.enableDotween = value;
-            }
-
-            EditorGUILayout.Space(15f);
-            if (GUILayout.Button("Apply Change"))
-            {
-                CompilationPipeline.RequestScriptCompilation();
-            }
-
-            if (modified)
+            EditorGUILayout.BeginVertical("GroupBox");
+            DrawConfig();
+            DrawFeature();
+            EditorGUILayout.EndVertical();
+            if (GUI.changed)
             {
                 EditorUtility.SetDirty(setting);
                 AssetDatabase.SaveAssetIfDirty(setting);
             }
+        }
 
-            EditorGUILayout.EndVertical();
+        private void DrawConfig()
+        {
+            configFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(configFoldout, "Config");
+            if (configFoldout)
+            {
+                EditorGUILayout.LabelField("Data Layer", EditorStyles.boldLabel);
+                setting.dataLayerType = (Data.DataLayer.DataLayerType)EditorGUILayout.EnumPopup("Data Layer Type", setting.dataLayerType);
+            }
+            EditorGUI.EndFoldoutHeaderGroup();
+        }
+
+        private void DrawFeature()
+        {
+            featureFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(featureFoldout, "Features");
+            if (featureFoldout)
+            {
+
+                EditorGUILayout.LabelField("Advertise", EditorStyles.boldLabel);
+
+                var value = EditorGUILayout.Toggle("Enable Admob", setting.enableAds);
+
+                if (value != setting.enableAds)
+                {
+                    if (value)
+                    {
+                        AddSymbol("GF_ADS", targetGroup);
+                    }
+                    else
+                    {
+                        RemoveSymbol("GF_ADS", targetGroup);
+                    }
+                    setting.enableAds = value;
+                }
+
+                EditorGUILayout.Space(10f);
+
+                EditorGUILayout.LabelField("Analytics", EditorStyles.boldLabel);
+                value = EditorGUILayout.Toggle("Enable Firebase", setting.enableFirebase);
+                if (value != setting.enableFirebase)
+                {
+                    if (value)
+                    {
+                        AddSymbol("GF_FIREBASE", targetGroup);
+                    }
+                    else
+                    {
+                        RemoveSymbol("GF_FIREBASE", targetGroup);
+                    }
+                    setting.enableFirebase = value;
+                }
+
+                EditorGUILayout.Space(10f);
+
+                EditorGUILayout.LabelField("In-App Purchasing", EditorStyles.boldLabel);
+                value = EditorGUILayout.Toggle("Enable IAP", setting.enableIap);
+                if (value != setting.enableIap)
+                {
+                    if (value)
+                    {
+                        AddSymbol("GF_IAP", targetGroup);
+                    }
+                    else
+                    {
+                        RemoveSymbol("GF_IAP", targetGroup);
+                    }
+                    setting.enableIap = value;
+                }
+
+                EditorGUILayout.Space(10f);
+
+                EditorGUILayout.LabelField("Dotween", EditorStyles.boldLabel);
+                value = EditorGUILayout.Toggle("Enable Dotween", setting.enableDotween);
+                if (value != setting.enableDotween)
+                {
+                    if (value)
+                    {
+                        AddSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroup);
+                    }
+                    else
+                    {
+                        RemoveSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroup);
+                    }
+                    setting.enableDotween = value;
+                }
+
+                EditorGUILayout.Space(15f);
+                if (GUILayout.Button("Apply Change"))
+                {
+                    CompilationPipeline.RequestScriptCompilation();
+                }
+            }
+            EditorGUI.EndFoldoutHeaderGroup();
         }
 
         private void AddSymbol(string symbol, List<BuildTargetGroup> groups)

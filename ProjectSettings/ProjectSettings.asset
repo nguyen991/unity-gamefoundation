@@ -684,9 +684,10 @@ PlayerSettings:
   webGLThreadsSupport: 0
   webGLDecompressionFallback: 0
   scriptingDefineSymbols:
-    1: GF_ADS;GF_IAP
-    4: GF_ADS;GF_IAP
-    7: GF_ADS;GF_IAP
+    1: GF_IAP;GF_ADS
+    4: GF_IAP;GF_ADS
+    7: GF_IAP;GF_ADS
+    13: GF_IAP;GF_ADS
   additionalCompilerArguments: {}
   platformArchitecture: {}
   scriptingBackend:

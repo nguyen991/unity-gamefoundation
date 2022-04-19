@@ -13,6 +13,7 @@ MonoBehaviour:
   m_Name: GameFoundationSetting
   m_EditorClassIdentifier: 
   enableAds: 1
-  enableAnalytics: 0
+  enableFirebase: 0
   enableIap: 1
   enableDotween: 0
+  dataLayerType: 1

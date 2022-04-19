@@ -106,6 +106,7 @@ public class TestAtlasLoader : MonoBehaviour
 
     public async void IAPTest()
     {
+#if GF_IAP
         Debug.Log("Price " + EconomyManager.Instance.Transaction.Get("iap_transaction").cost.product.metadata.localizedPriceString);
 
         var result = await EconomyManager.Instance.Transaction.BeginTransaction("iap_transaction");
@@ -122,6 +123,7 @@ public class TestAtlasLoader : MonoBehaviour
         {
             Debug.LogWarning("Transaction iap_transaction error");
         }
+#endif
     }
 
     public void Save()

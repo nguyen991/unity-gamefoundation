@@ -70,7 +70,7 @@ namespace GameFoundation
             }
 
             // init firebase
-            if (setting.enableAnalytics)
+            if (setting.enableFirebase)
             {
                 Mobile.FirebaseInstance.Init();
             }

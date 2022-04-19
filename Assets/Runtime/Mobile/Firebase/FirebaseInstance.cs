@@ -8,7 +8,7 @@ namespace GameFoundation.Mobile
     {
         public static void Init()
         {
-#if GF_ANALYTICS
+#if GF_FIREBASE
             Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task =>
             {
                 var dependencyStatus = task.Result;
@@ -27,7 +27,7 @@ namespace GameFoundation.Mobile
 
         public static void Log(string eventName, params Mobile.LogEvent.Parameter[] parameters)
         {
-#if GF_ANALYTICS
+#if GF_FIREBASE
             var fb_params = new List<Firebase.Analytics.Parameter>();
             foreach (var value in parameters)
             {
@@ -37,7 +37,7 @@ namespace GameFoundation.Mobile
 #endif
         }
 
-#if GF_ANALYTICS
+#if GF_FIREBASE
         private static Firebase.Analytics.Parameter ToFirebaseParam(Mobile.LogEvent.Parameter param)
         {
             if (param.stringValue != null)

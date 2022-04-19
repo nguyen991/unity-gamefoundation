@@ -53,9 +53,15 @@ namespace GameFoundation.Economy
 #endif
         }
 
-        public void RestoreIAP()
+        public async UniTask RestoreIAP()
         {
-            iapListener.Restore();
+#if GF_IAP
+            var task = new UniTaskCompletionSource<bool>();
+            iapListener.Restore(task);
+            await task.Task;
+#else
+            await UniTask.CompletedTask;
+#endif
         }
 
         public async UniTask<TransactionData> BeginTransaction(string key)

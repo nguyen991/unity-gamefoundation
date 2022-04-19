@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -81,11 +82,9 @@ namespace GameFoundation.Economy
             controller.InitiatePurchase(productID);
         }
 
-        public void Restore()
+        public void Restore(UniTaskCompletionSource<bool> task)
         {
-            GetStoreExtensions<IAppleExtensions>().RestoreTransactions((result) =>
-            {
-            });
+            GetStoreExtensions<IAppleExtensions>().RestoreTransactions((result) => task.TrySetResult(result));
         }
 
         public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
