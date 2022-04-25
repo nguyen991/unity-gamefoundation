@@ -15,6 +15,7 @@ namespace GameFoundation.Editor.Economy
         private ItemEditor itemEditor = new ItemEditor();
         private TransactionEditor transactionEditor = new TransactionEditor();
         private StoreEditor storeEditor = new StoreEditor();
+        private RewardEditor rewardEditor = new RewardEditor();
 
         [MenuItem("Game Foundation/Economy/Editor", false, 21)]
         public static void ShowWindow()
@@ -59,6 +60,9 @@ namespace GameFoundation.Editor.Economy
                     break;
                 case 3:
                     DrawCatalog(storeEditor, economyData, economyData.storeCatalog);
+                    break;
+                case 4:
+                    DrawCatalog(rewardEditor, economyData, economyData.rewardCatalog);
                     break;
                 default:
                     break;

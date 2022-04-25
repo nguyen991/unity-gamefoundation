@@ -12,5 +12,6 @@ namespace GameFoundation.Economy
         [HideInInspector] public ItemCatalog itemCatalog;
         [HideInInspector] public TransactionCatalog transactionCatalog;
         [HideInInspector] public StoreCatalog storeCatalog;
+        [HideInInspector] public RewardCatalog rewardCatalog;
     }
 }
