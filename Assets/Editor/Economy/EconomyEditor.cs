@@ -8,7 +8,7 @@ namespace GameFoundation.Editor.Economy
 {
     public class EconomyEditor : EditorWindow
     {
-        private readonly string[] Tabs = new string[] { "Currency", "Item", "Transaction", "Store" };
+        private readonly string[] Tabs = new string[] { "Currency", "Item", "Transaction", "Store", "Reward" };
         private int selectedTab = 0;
         private EconomyData economyData = null;
         private CurrencyEditor currencyEditor = new CurrencyEditor();

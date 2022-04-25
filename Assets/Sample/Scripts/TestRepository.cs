@@ -1,6 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
-using GameFoundation.Model;
+using GameFoundation.State;
 using UnityEngine;
 using UnityEngine.UI;
 

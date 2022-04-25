@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using GameFoundation.Utilities;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
 
 namespace GameFoundation.Economy
 {
@@ -33,8 +34,6 @@ namespace GameFoundation.Economy
         {
             this.catalog = catalog;
             this.items = new Dictionary<string, ItemData>();
-
-            //TODO: load inventory data from persistent storage
 
             // init new items
             catalog.Items.ForEach(item =>
@@ -209,6 +208,20 @@ namespace GameFoundation.Economy
         private string GenrateUUID()
         {
             return System.Guid.NewGuid().ToString();
+        }
+
+        [OnDeserialized]
+        internal void OnDeserialized(StreamingContext context)
+        {
+            // popuplate item data
+            foreach (var item in items)
+            {
+                item.Value.item = Find(item.Key);
+            }
+
+            // remove items not in catalog
+            var keys = items.Keys.Where(key => catalog.Find(key) == null).ToList();
+            keys.ForEach(key => items.Remove(key));
         }
     }
 }

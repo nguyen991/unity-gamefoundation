@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 
-namespace GameFoundation.Model
+namespace GameFoundation.State
 {
-    public abstract class GFModel
+    public abstract class Model
     {
         public string Name { get; set; } = "";
 
         public string FileName { get; set; } = "";
 
-        public GFModel(string name = "")
+        public Model(string name = "")
         {
             Name = string.IsNullOrEmpty(name) ? GetType().ToString() : name;
             FileName = Name + ".dat";

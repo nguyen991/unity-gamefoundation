@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using UnityEngine;
@@ -77,19 +78,15 @@ namespace GameFoundation.Economy
         [OnDeserialized]
         internal void OnDeserialized(StreamingContext context)
         {
-            Debug.Log("OnDeserialized");
-            // init new currencies
-            catalog.Items.ForEach(currency =>
+            // popuplate currencies data
+            foreach (var currency in currencies)
             {
-                if (!currencies.ContainsKey(currency.key))
-                {
-                    currencies.Add(currency.key, new CurrencyData()
-                    {
-                        currency = currency,
-                        balance = currency.initBalance
-                    });
-                }
-            });
+                currency.Value.currency = Find(currency.Key);
+            }
+
+            // remove currencies not in catalog
+            var keys = currencies.Keys.Where(key => currencies[key].currency == null).ToList();
+            keys.ForEach(key => currencies.Remove(key));
         }
     }
 }

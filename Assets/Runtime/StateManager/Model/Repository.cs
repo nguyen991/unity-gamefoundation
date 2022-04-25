@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace GameFoundation.Model
+namespace GameFoundation.State
 {
     public class Repository
     {
@@ -11,14 +11,14 @@ namespace GameFoundation.Model
 
         public GameFoundation.Data.IDataLayer DataLayer { get; set; }
 
-        private IDictionary<string, GFModel> models;
+        private IDictionary<string, Model> models;
 
         private Repository()
         {
-            models = new Dictionary<string, GFModel>();
+            models = new Dictionary<string, Model>();
         }
 
-        public T Register<T>(T model, bool reload = false, bool cacheType = true) where T : GFModel
+        public T Register<T>(T model, bool reload = false, bool cacheType = true) where T : Model
         {
             var key = model.Name;
             if (models.ContainsKey(key))
@@ -40,17 +40,17 @@ namespace GameFoundation.Model
             return model;
         }
 
-        public bool UnRegister<T>(T model) where T : GFModel
+        public bool UnRegister<T>(T model) where T : Model
         {
             models.Remove(model.Name);
             models.Remove($"Type {model.GetType()}");
             return true;
         }
 
-        public T Get<T>(string name = "") where T : GFModel
+        public T Get<T>(string name = "") where T : Model
         {
             var key = string.IsNullOrEmpty(name) ? $"Type {typeof(T)}" : name;
-            if (models.TryGetValue(key, out GFModel model))
+            if (models.TryGetValue(key, out Model model))
             {
                 return model as T;
             }
@@ -74,7 +74,7 @@ namespace GameFoundation.Model
             return false;
         }
 
-        public bool Save<T>(T model) where T : GFModel
+        public bool Save<T>(T model) where T : Model
         {
             if (!model.GetType().IsSerializable)
             {
@@ -92,7 +92,7 @@ namespace GameFoundation.Model
             return false;
         }
 
-        public bool Load<T>(T model) where T : GFModel
+        public bool Load<T>(T model) where T : Model
         {
             return DataLayer.Load(model.FileName, model);
         }

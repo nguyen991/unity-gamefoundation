@@ -187,9 +187,7 @@ MonoBehaviour:
     currencies:
     - item: {fileID: -8998177290678339948}
       amount: 1
-    items:
-    - item: {fileID: 0}
-      amount: 1
+    items: []
     adsId: 
     productId: 
 --- !u!114 &3291861044389490590
@@ -274,7 +272,16 @@ MonoBehaviour:
   tags:
   - tag_1
   properties:
-    list: []
+    list:
+    - Key: icon
+      Value:
+        type: 5
+        intValue: 0
+        floatValue: 0
+        stringValue: 
+        boolValue: 0
+        prefabValue: {fileID: 0}
+        spriteValue: {fileID: 21300000, guid: d0f4380b849f44b40959578e5d8bb68b, type: 3}
     keyCollision: 0
   initBalance: 0
   maxBalance: 0

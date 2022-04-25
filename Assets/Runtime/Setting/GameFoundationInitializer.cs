@@ -51,7 +51,7 @@ namespace GameFoundation
             dataLayer.Init(dataLayerType);
 
             // init model Repository
-            Model.Repository.Instance.DataLayer = dataLayer.Layer;
+            State.Repository.Instance.DataLayer = dataLayer.Layer;
 
             var tasks = new List<UniTask>();
 

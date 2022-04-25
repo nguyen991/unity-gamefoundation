@@ -1,10 +1,10 @@
 using System.Collections;
 using System.Collections.Generic;
-using GameFoundation.Model;
+using GameFoundation.State;
 using UniRx;
 
 [System.Serializable]
-public class PlayerModel : GFModel
+public class PlayerModel : Model
 {
     public int score;
     public int hp;

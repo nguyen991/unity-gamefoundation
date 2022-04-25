@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GameFoundation.State
 {
-    public abstract class StateModel<T> : MonoBehaviour where T : Model.GFModel
+    public abstract class StateModel<T> : MonoBehaviour where T : Model
     {
         public T Model { get; protected set; }
 

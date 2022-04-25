@@ -10,7 +10,7 @@ namespace GameFoundation.State
     {
         public abstract void ChangeState(object ID);
 
-        public T GetModel<T>() where T : Model.GFModel
+        public T GetModel<T>() where T : Model
         {
             return GetComponent<StateModel<T>>().Model;
         }
