@@ -8,12 +8,9 @@ namespace GameFoundation.Economy
     public class RewardTableItem
     {
         public float percent;
-        public List<Currency> currencies;
-        public List<Item> items;
+        public List<TransactionItem<Currency>> currencies = new List<TransactionItem<Currency>>();
+        public List<TransactionItem<Item>> items = new List<TransactionItem<Item>>();
     }
-
-    [System.Serializable]
-    public class RewardTable : List<RewardTableItem> { }
 
     [System.Serializable]
     public class Reward : CatalogItem
@@ -42,7 +39,19 @@ namespace GameFoundation.Economy
         public int limit;
         public DurationTime cooldown;
         public DurationTime expire;
-        public RewardTable rewardTable;
+        [SerializeField] protected List<RewardTableItem> rewardTable;
+        public List<RewardTableItem> RewardTable
+        {
+            get
+            {
+                rewardTable?.ForEach(it =>
+                {
+                    it.currencies.RemoveAll(c => c.item == null);
+                    it.items.RemoveAll(i => i.item == null);
+                });
+                return rewardTable;
+            }
+        }
     }
 
     [System.Serializable]

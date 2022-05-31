@@ -51,6 +51,47 @@ MonoBehaviour:
     items: []
     adsId: 
     productId: 
+--- !u!114 &-7242901565627120110
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ba244636d5b78449aabcb57b2a828ef3, type: 3}
+  m_Name: Reward_lucky_wheel
+  m_EditorClassIdentifier: 
+  key: lucky_wheel
+  display: Lucky Wheel
+  tags: []
+  properties:
+    list: []
+    keyCollision: 0
+  type: 1
+  limit: 5
+  cooldown:
+    duration: 1
+    type: 0
+  expire:
+    duration: 1
+    type: 0
+  rewardTable:
+  - percent: 0.5
+    currencies:
+    - item: {fileID: -335646823422718617}
+      amount: 10
+    items:
+    - item: {fileID: 9095505004806910628}
+      amount: 1
+    - item: {fileID: -6016172656384296021}
+      amount: 1
+  - percent: 0.5
+    currencies:
+    - item: {fileID: -335646823422718617}
+      amount: 20
+    items: []
 --- !u!114 &-7005304904987302397
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -125,6 +166,7 @@ MonoBehaviour:
         boolValue: 0
         prefabValue: {fileID: 0}
         spriteValue: {fileID: 21300000, guid: 04981d33457ad4d6394495c6751327dd, type: 3}
+        audioValue: {fileID: 0}
     keyCollision: 0
   initBalance: 500
   maxBalance: 5000
@@ -160,6 +202,7 @@ MonoBehaviour:
   rewardCatalog:
     items:
     - {fileID: 1006458976540240530}
+    - {fileID: -7242901565627120110}
 --- !u!114 &382000017016326160
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -206,11 +249,30 @@ MonoBehaviour:
   m_Name: Reward_daily_login
   m_EditorClassIdentifier: 
   key: daily_login
-  display: Daily_login
+  display: Daily Login
   tags: []
   properties:
     list: []
     keyCollision: 0
+  type: 0
+  limit: 1
+  cooldown:
+    duration: 0
+    type: 0
+  expire:
+    duration: 2
+    type: 1
+  rewardTable:
+  - percent: 0.2
+    currencies:
+    - item: {fileID: -335646823422718617}
+      amount: 1
+    items: []
+  - percent: 0.8
+    currencies:
+    - item: {fileID: -335646823422718617}
+      amount: 10
+    items: []
 --- !u!114 &3291861044389490590
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -270,6 +332,7 @@ MonoBehaviour:
         boolValue: 0
         prefabValue: {fileID: 0}
         spriteValue: {fileID: 0}
+        audioValue: {fileID: 0}
     keyCollision: 0
   initBalance: 0
   maxBalance: 100
@@ -303,6 +366,7 @@ MonoBehaviour:
         boolValue: 0
         prefabValue: {fileID: 0}
         spriteValue: {fileID: 21300000, guid: d0f4380b849f44b40959578e5d8bb68b, type: 3}
+        audioValue: {fileID: 0}
     keyCollision: 0
   initBalance: 0
   maxBalance: 0

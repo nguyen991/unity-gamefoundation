@@ -61,27 +61,27 @@ namespace GameFoundation.Economy
             List<RewardTableItem> items = new List<RewardTableItem>();
             if (reward.type == Reward.RewardType.Progressive)
             {
-                items.Add(reward.rewardTable[claimed]);
+                items.Add(reward.RewardTable[claimed]);
             }
             else if (reward.type == Reward.RewardType.Randomized)
             {
                 var r = UnityEngine.Random.Range(0f, 1f);
-                for (int i = 0; i < reward.rewardTable.Count; i++)
+                for (int i = 0; i < reward.RewardTable.Count; i++)
                 {
-                    if (r <= reward.rewardTable[i].percent)
+                    if (r <= reward.RewardTable[i].percent)
                     {
-                        items.Add(reward.rewardTable[i]);
+                        items.Add(reward.RewardTable[i]);
                         break;
                     }
-                    r -= reward.rewardTable[i].percent;
+                    r -= reward.RewardTable[i].percent;
                 }
             }
 
             // increase currency and inventory
             items.ForEach(it =>
             {
-                it.currencies.ForEach(c => wallet.Add(c.key, 1));
-                it.items.ForEach(i => inventory.Create(i.key, 1));
+                it.currencies.ForEach(c => wallet.Add(c.item.key, c.amount));
+                it.items.ForEach(i => inventory.Create(i.item.key, i.amount));
             });
         }
 

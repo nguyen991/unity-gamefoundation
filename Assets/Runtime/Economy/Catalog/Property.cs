@@ -16,6 +16,7 @@ namespace GameFoundation.Economy
             Bool,
             Prefab,
             Sprite,
+            Audio,
         }
 
         [SerializeField]
@@ -51,6 +52,11 @@ namespace GameFoundation.Economy
         [AllowNesting]
         private Sprite spriteValue;
 
+        [SerializeField]
+        [ShowIf("type", ValueType.Audio)]
+        [AllowNesting]
+        private AudioClip audioValue;
+
         public ValueType Type
         {
             get { return type; }
@@ -84,6 +90,11 @@ namespace GameFoundation.Economy
         public Sprite GetSprite()
         {
             return spriteValue;
+        }
+
+        public AudioClip GetAudio()
+        {
+            return audioValue;
         }
     }
 }

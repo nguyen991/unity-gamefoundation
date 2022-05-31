@@ -198,6 +198,8 @@ namespace GameFoundation.Editor.Economy
 
         private UnityAction<T> onSelectItem;
 
+        private string searchString = "";
+
         public SelectItemPopup(List<T> items, UnityAction<T> onSelectItem)
         {
             this.items = items;
@@ -206,16 +208,29 @@ namespace GameFoundation.Editor.Economy
 
         public override void OnGUI(Rect rect)
         {
-            GUILayout.Label("Select:", EditorStyles.boldLabel);
-            scrollPos = GUILayout.BeginScrollView(scrollPos);
-            this.items.ForEach(item =>
+            // search box
+            GUILayout.BeginHorizontal();
+            searchString = GUILayout.TextField(searchString, GUI.skin.FindStyle("ToolbarSeachTextField"));
+            if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
             {
-                if (GUILayout.Button(item.key))
+                searchString = "";
+            }
+            GUILayout.EndHorizontal();
+            GUILayout.Space(5f);
+
+            // list
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+            this.items
+                .Where(item => item.key.Contains(searchString))
+                .ToList()
+                .ForEach(item =>
                 {
-                    this.editorWindow.Close();
-                    this.onSelectItem.Invoke(item);
-                }
-            });
+                    if (GUILayout.Button(item.key))
+                    {
+                        this.editorWindow.Close();
+                        this.onSelectItem.Invoke(item);
+                    }
+                });
             GUILayout.EndScrollView();
         }
     }

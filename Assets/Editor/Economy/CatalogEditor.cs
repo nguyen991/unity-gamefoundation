@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using GameFoundation.Economy;
+using UnityEditorInternal;
 
 namespace GameFoundation.Editor.Economy
 {
@@ -22,6 +23,8 @@ namespace GameFoundation.Editor.Economy
 
         protected string title = "";
 
+        private ReorderableList catalogListReorder;
+
         public CatalogEditor(string title)
         {
             this.title = title;
@@ -29,6 +32,30 @@ namespace GameFoundation.Editor.Economy
 
         public virtual void Init(EconomyData data, Catalog<T> catalog)
         {
+            if (this.catalog != catalog)
+            {
+                this.catalogListReorder = new ReorderableList(catalog.Items, typeof(T), true, false, false, false);
+                this.catalogListReorder.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) =>
+                {
+                    var item = catalog.Items[index];
+                    EditorGUI.LabelField(rect, item.display);
+                    if (GUI.Button(
+                            new Rect(rect.x + rect.width - 30, rect.y, 30, rect.height),
+                            EditorGUIUtility.IconContent("d_TreeEditor.Trash")) &&
+                        EditorUtility.DisplayDialog("Delete", $"Are you sure you want to delete {item.key}?", "Yes", "No"))
+                    {
+                        deleteItem = item;
+                        OnSelectItem(null);
+                    }
+                };
+                this.catalogListReorder.onReorderCallbackWithDetails = (ReorderableList list, int oldIndex, int newIndex) =>
+                {
+                    EditorUtility.SetDirty(data);
+                    AssetDatabase.SaveAssets();
+                };
+                this.catalogListReorder.onSelectCallback = (ReorderableList l) => OnSelectItem(catalog.Items[l.index]);
+            }
+
             this.economyData = data;
             this.catalog = catalog;
         }
@@ -70,26 +97,34 @@ namespace GameFoundation.Editor.Economy
             GUILayout.Space(5f);
 
             // list
-            catalog.Items
-                .Where(item => item.key.Contains(searchString))
-                .ToList()
-                .ForEach(item =>
+            if (!string.IsNullOrEmpty(searchString))
             {
-                GUILayout.BeginHorizontal("HelpBox");
-                GUILayout.Label(item.display, EditorStyles.boldLabel, GUILayout.Width(140));
-                if (GUILayout.Button(EditorGUIUtility.IconContent("_Popup")))
+                catalog.Items
+                    .Where(item => item.key.Contains(searchString))
+                    .ToList()
+                    .ForEach(item =>
                 {
-                    OnSelectItem(item);
-                }
-                if (GUILayout.Button(EditorGUIUtility.IconContent("d_TreeEditor.Trash")) &&
-                    EditorUtility.DisplayDialog("Delete", $"Are you sure you want to delete {item.key}?", "Yes", "No")
-                    )
-                {
-                    deleteItem = item;
-                    OnSelectItem(null);
-                }
-                GUILayout.EndHorizontal();
-            });
+                    GUILayout.BeginHorizontal("HelpBox");
+                    GUILayout.Label(item.display, EditorStyles.boldLabel, GUILayout.Width(140));
+                    if (GUILayout.Button(EditorGUIUtility.IconContent("_Popup")))
+                    {
+                        OnSelectItem(item);
+                    }
+                    if (GUILayout.Button(EditorGUIUtility.IconContent("d_TreeEditor.Trash")) &&
+                        EditorUtility.DisplayDialog("Delete", $"Are you sure you want to delete {item.key}?", "Yes", "No")
+                        )
+                    {
+                        deleteItem = item;
+                        OnSelectItem(null);
+                    }
+                    GUILayout.EndHorizontal();
+                });
+            }
+            else
+            {
+                this.catalogListReorder.DoLayoutList();
+            }
+
             GUILayout.EndScrollView();
             if (GUILayout.Button("+"))
             {
