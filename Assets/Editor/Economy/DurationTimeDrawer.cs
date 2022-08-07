@@ -11,7 +11,7 @@ namespace GameFoundation.Editor.Economy
     {
         public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
         {
-            property.serializedObject.Update();
+            // property.serializedObject.Update();
 
             // Using BeginProperty / EndProperty on the parent property means that
             // prefab override logic works on the entire property.
@@ -37,7 +37,7 @@ namespace GameFoundation.Editor.Economy
 
             EditorGUI.EndProperty();
 
-            property.serializedObject.ApplyModifiedProperties();
+            // property.serializedObject.ApplyModifiedProperties();
         }
     }
 }

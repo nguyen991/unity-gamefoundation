@@ -9,34 +9,27 @@ namespace GameFoundation.Pool
 {
     public class Pooling : Utilities.SingletonBehaviour<Pooling>
     {
-        [ValidateInput("ValidatePoolNodes", "Node ids are conflict")][SerializeField] private List<PoolNode> pools;
-
         public static readonly string MethodOnTake = "OnTakeFromPool";
-
         public static readonly string MethodOnReturn = "OnReturnToPool";
-
-        private bool ValidatePoolNodes()
-        {
-            return pools.Select(p => p.id).Distinct().Count() == pools.Count;
-        }
+        
+        [SerializeField] private GenericDictionary<string, PoolNode> pools = new GenericDictionary<string, PoolNode>();        
 
         public async UniTask Reload()
         {
-            await UniTask.WhenAll(pools.Select(p => p.Reload(transform)));
+            await UniTask.WhenAll(pools.Select(p => p.Value.Reload(transform)));
         }
 
         public async UniTask<T> Take<T>(string id, Transform parent = null) where T : Component
         {
-            var pool = pools.Find(p => p.id == id);
-            if (pool == null)
+            if (pools.TryGetValue(id, out var pool))
             {
-                return null;
+                var node = await pool.Take<T>();
+                node.transform.SetParent(parent, false);
+                node.gameObject.SetActive(true);
+                node.SendMessage(MethodOnTake, SendMessageOptions.DontRequireReceiver);
+                return node;
             }
-            var node = await pool.Take<T>();
-            node.transform.parent = parent;
-            node.SendMessage(MethodOnTake, SendMessageOptions.DontRequireReceiver);
-            node.gameObject.SetActive(true);
-            return node;
+            return null;
         }
 
         public async UniTask<Transform> Take(string id, Transform parent = null)
@@ -48,23 +41,36 @@ namespace GameFoundation.Pool
         {
             if (node == null)
             {
-                Debug.LogWarning($"Pooler: return null object to {id.ToString()}");
+                Debug.LogWarning($"Pooler: return null object for {id}");
                 return;
             }
 
-            var pool = pools.Find(p => p.id == id);
-            if (pool != null)
+            if (pools.TryGetValue(id, out var pool))
             {
-                node.gameObject.SetActive(false);
                 node.SendMessage(MethodOnReturn, SendMessageOptions.DontRequireReceiver);
-                node.parent = transform;
+                node.gameObject.SetActive(false);
+                node.SetParent(transform);
                 pool.Return(node.gameObject);
-            }
+            }                
         }
 
         public void Return(string id, GameObject node)
         {
             Return(id, node?.transform);
+        }
+
+        public async UniTask AddPoolNode(string id, GameObject prefab, int size)
+        {
+            if (pools.ContainsKey(id))
+            {
+                Debug.LogWarning($"Pooler: {id} already exists");
+            }
+            else
+            {
+                var pool = new PoolNode() { id = id, prefab = prefab, size = size };
+                pools.Add(id, pool);
+                await pool.Reload(transform);
+            }
         }
     }
 }

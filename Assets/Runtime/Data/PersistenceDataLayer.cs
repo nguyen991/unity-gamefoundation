@@ -82,7 +82,7 @@ namespace GameFoundation.Data
             name.Trim();
             if (!name.Contains(".dat"))
             {
-                name = name + ".dat";
+                name += ".dat";
             }
             return name;
         }

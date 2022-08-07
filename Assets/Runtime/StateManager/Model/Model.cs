@@ -12,7 +12,6 @@ namespace GameFoundation.State
         {
             Name = string.IsNullOrEmpty(name) ? GetType().ToString() : name;
             FileName = Name + ".dat";
-            Debug.Log($"Create Model {Name}");
         }
 
         public virtual void Register(bool reload = false, bool cacheType = false)
@@ -33,6 +32,14 @@ namespace GameFoundation.State
         public virtual void Load()
         {
             Repository.Instance.Load(this);
+        }
+
+        public virtual void PrepareSerialize()
+        {
+        }
+
+        public virtual void PrepareDeSerialize()
+        {
         }
     }
 }

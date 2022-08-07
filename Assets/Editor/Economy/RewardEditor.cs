@@ -11,8 +11,7 @@ namespace GameFoundation.Editor.Economy
 {
     public class RewardEditor : CatalogEditor<Reward>
     {
-        private ReorderableList rewardTable = null;
-        private SerializedObject serializedObject = null;
+        private ReorderableList rewardTable = null;        
 
         private float itemHeight = 22f;
 
@@ -25,12 +24,10 @@ namespace GameFoundation.Editor.Economy
             base.OnSelectItem(item);
             if (item == null)
             {
-                serializedObject = null;
                 rewardTable = null;
             }
             else
             {
-                serializedObject = new SerializedObject(selectedItem);
                 rewardTable = new ReorderableList(serializedObject, serializedObject.FindProperty("rewardTable"), true, false, true, true);
                 rewardTable.elementHeightCallback = (index) =>
                 {
@@ -46,7 +43,7 @@ namespace GameFoundation.Editor.Economy
                     // Percentage or Progressive
                     if (selectedItem.type == Reward.RewardType.Randomized)
                     {
-                        EditorGUI.LabelField(new Rect(rect.x + 5, rect.y, 50, itemHeight), "Percent", EditorStyles.boldLabel);
+                        EditorGUI.LabelField(new Rect(rect.x + 5, rect.y, 100, itemHeight), "Percent", EditorStyles.boldLabel);
                         var percentRect = new Rect(rect.x + 5, rect.y + itemHeight, 70, EditorGUIUtility.singleLineHeight);
                         rewardItem.percent = EditorGUI.FloatField(percentRect, rewardItem.percent);
                         rewardItem.percent = Mathf.Clamp(rewardItem.percent, 0f, 1f);
@@ -87,15 +84,16 @@ namespace GameFoundation.Editor.Economy
 
         protected override void DrawCustomItemData()
         {
-            serializedObject?.Update();
-
             EditorGUILayout.LabelField("Information:", EditorStyles.boldLabel);
 
             selectedItem.type = (Reward.RewardType)EditorGUILayout.EnumPopup("Type", selectedItem.type);
-            selectedItem.limit = EditorGUILayout.IntField("Limit Per Day", selectedItem.limit);
-
             if (serializedObject != null)
             {
+                EditorGUILayout.BeginHorizontal();
+                selectedItem.limit = EditorGUILayout.IntField("Limit", selectedItem.limit, GUILayout.Width(232));
+                EditorGUILayout.LabelField(" / ", GUILayout.Width(15));
+                EditorGUILayout.PropertyField(serializedObject.FindProperty("limitTime"), GUIContent.none);
+                EditorGUILayout.EndHorizontal();
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("cooldown"), true);
                 EditorGUILayout.PropertyField(serializedObject.FindProperty("expire"), true);
             }
@@ -110,12 +108,6 @@ namespace GameFoundation.Editor.Economy
 
             EditorGUILayout.LabelField("Reward Table:", EditorStyles.boldLabel);
             rewardTable?.DoLayoutList();
-
-            if (GUI.changed)
-            {
-                EditorUtility.SetDirty(selectedItem);
-            }
-            serializedObject?.ApplyModifiedProperties();
         }
 
         private void DrawRewardTable<T>(Rect rect, string title, List<TransactionItem<T>> items, List<T> selections, UnityAction<T> onSelectItem) where T : CatalogItem
@@ -166,6 +158,25 @@ namespace GameFoundation.Editor.Economy
             {
                 EditorUtility.SetDirty(selectedItem);
                 AssetDatabase.SaveAssets();
+            }
+        }
+
+        protected override void DrawInPlayMode()
+        {
+            EditorGUILayout.LabelField("Is Claimable", EconomyManager.Instance.Reward.IsClaimable(selectedItem.key).ToString());
+            EditorGUILayout.LabelField("Remain", EconomyManager.Instance.Reward.Remain(selectedItem.key).ToString());
+            EditorGUILayout.LabelField("Next Claim", EconomyManager.Instance.Reward.UntilNextClaim(selectedItem.key).ToString("hh\\:mm\\:ss"));
+            if (selectedItem.type == Reward.RewardType.Progressive)
+            {
+                EditorGUILayout.LabelField("Current Step", EconomyManager.Instance.Reward.Progressive(selectedItem.key).ToString());
+            }
+            if (GUILayout.Button("Claim"))
+            {
+                EconomyManager.Instance.Reward.Claim(selectedItem.key, true);
+            }
+            if (GUILayout.Button("Reset"))
+            {
+                EconomyManager.Instance.Reward.Reset(selectedItem.key);
             }
         }
     }

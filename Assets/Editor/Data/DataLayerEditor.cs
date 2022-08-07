@@ -22,6 +22,9 @@ namespace GameFoundation.Editor
                         File.Delete(file);
                     }
                 }
+
+                // clear player pref
+                PlayerPrefs.DeleteAll();
             }
         }
 

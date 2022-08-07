@@ -7,15 +7,18 @@ namespace GameFoundation.State
     {
         private static Repository repository = null;
 
-        public static Repository Instance => repository ?? (repository = new Repository());
+        public static Repository Instance => repository ??= new Repository();
 
-        public GameFoundation.Data.IDataLayer DataLayer { get; set; }
+        public Data.IDataLayer DataLayer { get; set; }
 
-        private IDictionary<string, Model> models;
+        private readonly IDictionary<string, Model> models;
+
+        private readonly Container di_container;
 
         private Repository()
         {
             models = new Dictionary<string, Model>();
+            di_container = new Container();
         }
 
         public T Register<T>(T model, bool reload = false, bool cacheType = true) where T : Model
@@ -37,6 +40,8 @@ namespace GameFoundation.State
                 Load(key);
             }
 
+            di_container.RegisterInstance(model).AsSelf();
+
             return model;
         }
 
@@ -44,6 +49,7 @@ namespace GameFoundation.State
         {
             models.Remove(model.Name);
             models.Remove($"Type {model.GetType()}");
+            di_container.RemoveInstance(model);
             return true;
         }
 
@@ -76,11 +82,12 @@ namespace GameFoundation.State
 
         public bool Save<T>(T model) where T : Model
         {
-            if (!model.GetType().IsSerializable)
+            if (model.GetType().IsSerializable)
             {
-                return false;
+                model.PrepareSerialize();
+                return DataLayer.Save(model.FileName, model);
             }
-            return DataLayer.Save(model.FileName, model);
+            return false;
         }
 
         public bool Load(string name)
@@ -94,7 +101,12 @@ namespace GameFoundation.State
 
         public bool Load<T>(T model) where T : Model
         {
-            return DataLayer.Load(model.FileName, model);
+            if (model.GetType().IsSerializable)
+            {
+                model.PrepareDeSerialize();
+                return DataLayer.Load(model.FileName, model);
+            }
+            return false;
         }
 
         public bool DeleteSaveFile(string name)
@@ -105,6 +117,11 @@ namespace GameFoundation.State
         public bool IsHaveSaveFile(string name)
         {
             return DataLayer.Exists(name);
+        }
+
+        public void ResolveDI<T>(T obj)
+        {
+            di_container.InjectAll(obj);
         }
     }
 }

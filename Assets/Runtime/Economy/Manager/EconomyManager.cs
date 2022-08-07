@@ -9,18 +9,19 @@ namespace GameFoundation.Economy
     {
         public EconomyData economyData;
 
-        public bool Intialized { get; private set; } = false;
+        public bool Initialized { get; private set; } = false;
 
         public WalletManager Wallet { get; private set; } = null;
         public InventoryManager Inventory { get; private set; } = null;
         public TransactionManager Transaction { get; private set; } = null;
         public StoreManager Store { get; private set; } = null;
+        public RewardManager Reward { get; private set; } = null;
 
-        private Data.IDataLayer dataLayer;
+        private Data.IDataLayer dataLayer = null;
 
         public void Init(Data.IDataLayer dataLayer, EconomyData data = null)
         {
-            if (Intialized)
+            if (Initialized)
             {
                 return;
             }
@@ -37,8 +38,9 @@ namespace GameFoundation.Economy
             Inventory = new InventoryManager(economyData.itemCatalog);
             Transaction = new TransactionManager(gameObject, economyData.transactionCatalog, Wallet, Inventory);
             Store = new StoreManager(economyData.storeCatalog);
+            Reward = new RewardManager(economyData.rewardCatalog, Inventory, Wallet);
 
-            Intialized = true;
+            Initialized = true;
         }
 
         public void Save()
@@ -47,6 +49,7 @@ namespace GameFoundation.Economy
             {
                 { "wallet", JsonConvert.SerializeObject(Wallet) },
                 { "inventory", JsonConvert.SerializeObject(Inventory) },
+                { "reward", JsonConvert.SerializeObject(Reward) }
             };
             dataLayer.Save("economy", data);
         }
@@ -58,15 +61,20 @@ namespace GameFoundation.Economy
             {
                 return;
             }
-            Debug.Log(data["wallet"]);
-            Debug.Log(data["inventory"]);
             if (data.ContainsKey("wallet"))
             {
+                Debug.Log(data["wallet"]);
                 JsonConvert.PopulateObject(data["wallet"], Wallet);
             }
             if (data.ContainsKey("inventory"))
             {
+                Debug.Log(data["inventory"]);
                 JsonConvert.PopulateObject(data["inventory"], Inventory);
+            }
+            if (data.ContainsKey("reward"))
+            {
+                Debug.Log(data["reward"]);
+                JsonConvert.PopulateObject(data["reward"], Reward);
             }
         }
     }

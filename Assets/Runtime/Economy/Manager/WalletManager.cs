@@ -1,9 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.Serialization;
 using Newtonsoft.Json;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace GameFoundation.Economy
 {
@@ -13,12 +15,14 @@ namespace GameFoundation.Economy
         protected class CurrencyData
         {
             [System.NonSerialized] public Currency currency;
-            public long balance;
+            public BigInteger balance;
         }
 
         private CurrencyCatalog catalog;
 
         [JsonProperty] private Dictionary<string, CurrencyData> currencies;
+
+        [JsonIgnore] public UnityEvent<string, BigInteger> OnChanged = new UnityEvent<string, BigInteger>();
 
         public WalletManager(CurrencyCatalog catalog)
         {
@@ -39,7 +43,7 @@ namespace GameFoundation.Economy
             });
         }
 
-        public long Get(string key)
+        public BigInteger Get(string key)
         {
             if (currencies.TryGetValue(key, out CurrencyData data))
             {
@@ -48,7 +52,7 @@ namespace GameFoundation.Economy
             return 0;
         }
 
-        public long Set(string key, long value)
+        public BigInteger Set(string key, BigInteger value)
         {
             if (currencies.TryGetValue(key, out CurrencyData data))
             {
@@ -57,11 +61,12 @@ namespace GameFoundation.Economy
                     value = value > data.currency.maxBalance ? data.currency.maxBalance : value;
                 }
                 data.balance = value;
+                OnChanged.Invoke(key, value);
             }
             return value;
         }
 
-        public long Add(string key, long value)
+        public BigInteger Add(string key, BigInteger value)
         {
             if (currencies.TryGetValue(key, out CurrencyData data))
             {

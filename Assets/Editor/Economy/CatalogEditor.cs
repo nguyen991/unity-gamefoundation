@@ -14,6 +14,7 @@ namespace GameFoundation.Editor.Economy
         protected Catalog<T> catalog;
 
         protected T selectedItem = null;
+        protected SerializedObject serializedObject;
         protected T deleteItem = null;
         protected string newKey = "";
         protected string searchString = "";
@@ -145,12 +146,15 @@ namespace GameFoundation.Editor.Economy
         protected virtual void OnSelectItem(T item)
         {
             selectedItem = item;
+            serializedObject?.Dispose();
+            serializedObject = item ? new SerializedObject(item) : null;
         }
 
         private void DrawItem()
         {
-            GUILayout.BeginVertical("HelpBox");
+            serializedObject?.Update();
 
+            GUILayout.BeginVertical("HelpBox");
             infoScrollPos = GUILayout.BeginScrollView(infoScrollPos);
 
             // basic info
@@ -158,20 +162,34 @@ namespace GameFoundation.Editor.Economy
             GUILayout.BeginVertical("GroupBox");
             EditorGUILayout.TextField("Key", selectedItem.key);
             selectedItem.display = EditorGUILayout.TextField("Display", selectedItem.display);
-            EditorGUILayout.PropertyField(new SerializedObject(selectedItem).FindProperty("tags"), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("tags"), true);
             // DrawTags();
-            EditorGUILayout.PropertyField(new SerializedObject(selectedItem).FindProperty("properties"), true);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("properties"), true);
             GUILayout.EndVertical();
 
             // item custom data
             GUILayout.Label(title, EditorStyles.boldLabel);
             GUILayout.BeginVertical("GroupBox");
             DrawCustomItemData();
-            GUILayout.EndVertical();
+            GUILayout.EndVertical(); // Vertical - GroupBox
 
-            GUILayout.EndScrollView();
+            // draw debug mode
+            if (Application.isPlaying)
+            {
+                GUILayout.Label("Debug", EditorStyles.boldLabel);
+                GUILayout.BeginVertical("GroupBox");
+                DrawInPlayMode();
+                GUILayout.EndVertical();
+            }
 
-            GUILayout.EndVertical();
+            GUILayout.EndScrollView(); // ScrollView
+            GUILayout.EndVertical(); // Vertical - HelpBox
+
+            if (GUI.changed)
+            {
+                EditorUtility.SetDirty(selectedItem);
+            }
+            serializedObject?.ApplyModifiedProperties();
         }
 
         // private void DrawTags()
@@ -192,6 +210,10 @@ namespace GameFoundation.Editor.Economy
         // }
 
         protected virtual void DrawCustomItemData()
+        {
+        }
+
+        protected virtual void DrawInPlayMode()
         {
         }
 

@@ -16,5 +16,6 @@ namespace GameFoundation.Mobile
         void RequestReward();
         void ShowReward(UnityAction<bool> callback = null);
         bool IsRewardAvailable();
+        bool IsBanner();
     }
 }

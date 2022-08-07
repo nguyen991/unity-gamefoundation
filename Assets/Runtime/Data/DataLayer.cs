@@ -14,7 +14,7 @@ namespace GameFoundation.Data
             PlayerPref,
         }
 
-        public IDataLayer Layer { get; private set; }
+        public IDataLayer Layer { get; private set; } = null;
 
         public bool Initialized { get; private set; } = false;
 
@@ -26,14 +26,21 @@ namespace GameFoundation.Data
             }
             Initialized = true;
 
+#if !UNITY_EDITOR && UNITY_WEBGL
+            type = DataLayerType.PlayerPref;
+            Debug.Log("WebGL platform, use PlayerPref data layer");
+#endif
+
             switch (type)
             {
                 case DataLayerType.Persistence:
                     Layer = new PersistenceDataLayer();
                     break;
                 case DataLayerType.PlayerPref:
+                    Layer = new PlayerPrefDataLayer();
                     break;
                 default:
+                    Layer = new MemoryDataLayer();
                     break;
             }
         }

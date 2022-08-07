@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Cysharp.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -13,19 +14,19 @@ namespace GameFoundation.Pool
 
         public GameObject prefab = null;
 
-        public AssetReference asset = null;
+        public AssetReference assetPref = null;
 
         [Min(1)]
         public int size;
 
-        private List<GameObject> pooled = null;
+        private HashSet<GameObject> pooled = null;
 
         public async UniTask Reload(Transform root)
         {
             // init list pooled
             if (pooled == null)
             {
-                pooled = new List<GameObject>();
+                pooled = new HashSet<GameObject>();
             }
 
             // calculate how many we need to add
@@ -36,9 +37,9 @@ namespace GameFoundation.Pool
                 foreach (var go in arr)
                 {
                     go.SetActive(false);
-                    go.transform.parent = root;
+                    go.transform.SetParent(root, false);
+                    pooled.Add(go);
                 }
-                pooled.AddRange(arr);
             }
         }
 
@@ -53,9 +54,9 @@ namespace GameFoundation.Pool
             else
             {
                 // get pooled instance
-                var instance = pooled[0].GetComponent<T>();
-                pooled.RemoveAt(0);
-                return instance;
+                var instance = pooled.ElementAt(0);
+                pooled.Remove(instance);
+                return instance.GetComponent<T>();
             }
         }
 
@@ -65,9 +66,9 @@ namespace GameFoundation.Pool
             {
                 return GameObject.Instantiate(prefab);
             }
-            if (asset != null)
+            if (assetPref != null)
             {
-                return await asset.InstantiateAsync().ToUniTask();
+                return await assetPref.InstantiateAsync().ToUniTask();
             }
             return null;
         }

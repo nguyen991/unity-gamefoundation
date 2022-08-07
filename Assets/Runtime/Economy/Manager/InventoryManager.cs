@@ -5,6 +5,8 @@ using UnityEngine;
 using GameFoundation.Utilities;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
+using UnityEngine.Events;
+using Cysharp.Threading.Tasks;
 
 namespace GameFoundation.Economy
 {
@@ -29,6 +31,9 @@ namespace GameFoundation.Economy
         private ItemCatalog catalog;
 
         [JsonProperty] private Dictionary<string, ItemData> items;
+
+        [JsonIgnore] public UnityEvent onItemAdded = new UnityEvent();
+        [JsonIgnore] public UnityEvent onItemRemoved = new UnityEvent();
 
         public InventoryManager(ItemCatalog catalog)
         {
@@ -121,12 +126,16 @@ namespace GameFoundation.Economy
 
                 // create a new item
                 items[key].instances.AddRange(newInstance);
+
+                // delay one frame and invoke
+                UniTask.DelayFrame(1).ContinueWith(() => onItemAdded.Invoke());
+
                 return newInstance;
             }
             return null;
         }
 
-        public bool Remove(string key, long amount)
+        public bool Remove(string key, long amount = 1)
         {
             if (items.TryGetValue(key, out ItemData data))
             {
@@ -155,13 +164,13 @@ namespace GameFoundation.Economy
 
                 // remove empty items
                 data.instances.RemoveAll(instance => instance.amount == 0);
-
+                onItemRemoved.Invoke();
                 return true;
             }
             return false;
         }
 
-        public bool RemoveById(string id, long amount)
+        public bool RemoveById(string id, long amount = 1)
         {
             // find instance by id
             var instance = items.Values.SelectMany(item => item.instances).FirstOrDefault(instance => instance.id == id);
@@ -174,6 +183,8 @@ namespace GameFoundation.Economy
                 {
                     items[instance.key].instances.Remove(instance);
                 }
+
+                onItemRemoved.Invoke();
                 return true;
             }
             return false;

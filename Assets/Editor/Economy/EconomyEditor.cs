@@ -39,6 +39,12 @@ namespace GameFoundation.Editor.Economy
                 }
                 else
                 {
+                    // create Resources folder
+                    if (!AssetDatabase.IsValidFolder("Assets/Resources"))
+                    {
+                        AssetDatabase.CreateFolder("Assets", "Resources");
+                    }
+
                     // create new asset
                     economyData = ScriptableObject.CreateInstance<EconomyData>();
                     AssetDatabase.CreateAsset(economyData, "Assets/Resources/EconomyData.asset");

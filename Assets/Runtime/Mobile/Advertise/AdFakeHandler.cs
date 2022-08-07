@@ -42,6 +42,11 @@ namespace GameFoundation.Mobile
         {
         }
 
+        public bool IsBanner()
+        {
+            return true;
+        }
+
         public void RequestInterstitial()
         {
         }

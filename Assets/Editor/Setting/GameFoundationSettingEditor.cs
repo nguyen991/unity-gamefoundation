@@ -1,15 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEditor;
 using GameFoundation;
 using UnityEditor.Compilation;
+using GameFoundation.Economy;
+using static GameFoundation.Data.DataLayer;
 
 namespace GameFoundation.Editor
 {
     public class GameFoundationSettingEditor : EditorWindow
     {
         private GameFoundationSetting setting = null;
+        private static SerializedObject serializedObject;
         private List<BuildTargetGroup> targetGroup = new List<BuildTargetGroup>()
         {
             BuildTargetGroup.Standalone,
@@ -18,7 +22,8 @@ namespace GameFoundation.Editor
             BuildTargetGroup.iOS,
         };
 
-        private bool featureFoldout = true;
+        private bool featureFoldout = false;
+        private Vector2 scrollPos = Vector2.zero;
 
         [MenuItem("Game Foundation/Setting", false, 0)]
         public static void ShowWindow()
@@ -30,6 +35,10 @@ namespace GameFoundation.Editor
 
         private void OnGUI()
         {
+            serializedObject?.ApplyModifiedProperties();
+            serializedObject?.Dispose();
+            serializedObject = null;
+
             // find setting asset
             if (setting == null)
             {
@@ -53,27 +62,36 @@ namespace GameFoundation.Editor
             // draw setting
             if (setting != null)
             {
+                serializedObject = new SerializedObject(setting);
+                serializedObject.Update();
                 Draw();
+                if (GUI.changed)
+                {
+                    EditorUtility.SetDirty(setting);
+                }
+                serializedObject.ApplyModifiedProperties();
             }
         }
 
         private void Draw()
         {
+            scrollPos = GUILayout.BeginScrollView(scrollPos);
+
             EditorGUILayout.BeginVertical("GroupBox");
             DrawFeature();
             EditorGUILayout.EndVertical();
-            if (GUI.changed)
-            {
-                EditorUtility.SetDirty(setting);
-                AssetDatabase.SaveAssetIfDirty(setting);
-            }
+
+            EditorGUILayout.BeginVertical("GroupBox");
+            DrawSettings();
+            EditorGUILayout.EndVertical();
+
+            GUILayout.EndScrollView();
         }
         private void DrawFeature()
         {
             featureFoldout = EditorGUILayout.BeginFoldoutHeaderGroup(featureFoldout, "Features");
             if (featureFoldout)
             {
-                EditorGUILayout.BeginVertical("HelpBox");
                 EditorGUILayout.LabelField("Advertise", EditorStyles.boldLabel);
 
                 var value = EditorGUILayout.Toggle("Enable Admob", setting.enableAds);
@@ -147,7 +165,6 @@ namespace GameFoundation.Editor
                 {
                     CompilationPipeline.RequestScriptCompilation();
                 }
-                EditorGUILayout.EndVertical();
             }
             EditorGUI.EndFoldoutHeaderGroup();
         }
@@ -174,6 +191,42 @@ namespace GameFoundation.Editor
                     PlayerSettings.SetScriptingDefineSymbolsForGroup(target, PlayerSettings.GetScriptingDefineSymbolsForGroup(target).Replace(symbol, ""));
                 }
             });
+        }
+
+        private void DrawSettings()
+        {
+            EditorGUILayout.LabelField("Editor", EditorStyles.boldLabel);
+            setting.startSceneIndex = EditorGUILayout.Popup("Master Scene", setting.startSceneIndex, EditorBuildSettings.scenes.Select(scene => scene.path).ToArray());
+
+            EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Mobile Optimize", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Resolution", GUILayout.Width(150));
+            setting.designResolution = EditorGUILayout.Vector2IntField(GUIContent.none, setting.designResolution);
+            EditorGUILayout.EndHorizontal();
+            setting.fps = EditorGUILayout.IntField("FPS", setting.fps);
+            setting.multiTouch = EditorGUILayout.Toggle("Multi Touch", setting.multiTouch);
+
+            EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Advertise", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("adConfig"), true);
+            setting.useAdFakeOnEditor = EditorGUILayout.Toggle("Use Ad Fake On Editor", setting.useAdFakeOnEditor);
+            setting.adFakeAvailable = EditorGUILayout.Toggle("Ad Fake Available", setting.adFakeAvailable);
+
+            EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Local Notification", EditorStyles.boldLabel);
+            setting.autoScheduleNotification = EditorGUILayout.Toggle("Auto Schedule Notification", setting.autoScheduleNotification);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("notifications"), true);
+
+            EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Economy", EditorStyles.boldLabel);
+            setting.economyData = EditorGUILayout.ObjectField("Economy Data", setting.economyData, typeof(EconomyData), false) as EconomyData;
+            setting.dataLayerType = (DataLayerType)EditorGUILayout.EnumPopup("Data Layer", setting.dataLayerType);
+            setting.saveOnLostFocus = EditorGUILayout.Toggle("Save On Lost Focus", setting.saveOnLostFocus);
+
+            EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
+            EditorGUILayout.LabelField("Sprite Atlas", EditorStyles.boldLabel);
+            EditorGUILayout.PropertyField(serializedObject.FindProperty("spriteAtlasLabels"), true);
         }
     }
 }

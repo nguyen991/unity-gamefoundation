@@ -14,9 +14,7 @@ namespace GameFoundation.Editor.Economy
 
         private string searchTransaction = "";
 
-        private ReorderableList transactionList;
-
-        private SerializedObject serializedObject;
+        private ReorderableList transactionList;        
 
         public StoreEditor() : base("Store")
         {
@@ -41,11 +39,6 @@ namespace GameFoundation.Editor.Economy
             GUILayout.EndVertical();
 
             EditorGUILayout.EndHorizontal();
-
-            if (GUI.changed)
-            {
-                EditorUtility.SetDirty(selectedItem);
-            }
         }
 
         protected override void OnSelectItem(Store item)
@@ -53,13 +46,11 @@ namespace GameFoundation.Editor.Economy
             base.OnSelectItem(item);
 
             if (item == null)
-            {
-                serializedObject = null;
+            {                
                 transactionList = null;
             }
             else
-            {
-                serializedObject = new SerializedObject(selectedItem);
+            {                
                 transactionList = new ReorderableList(serializedObject, serializedObject.FindProperty("transactions"), true, false, false, true);
                 transactionList.drawElementCallback = (rect, index, isActive, isFocused) =>
                 {
@@ -75,9 +66,7 @@ namespace GameFoundation.Editor.Economy
 
             if (serializedObject != null && transactionList != null)
             {
-                serializedObject.Update();
                 transactionList.DoLayoutList();
-                serializedObject.ApplyModifiedProperties();
             }
         }
 

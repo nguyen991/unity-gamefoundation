@@ -10,5 +10,10 @@ namespace GameFoundation.Utilities
         {
             return new Color(color.r, color.g, color.b, alpha);
         }
+
+        public static Color A(this Color color, int alpha)
+        {
+            return new Color(color.r, color.g, color.b, alpha / 255f);
+        }
     }
 }

@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
@@ -38,7 +39,7 @@ namespace GameFoundation.Mobile
         public bool useAdFakeOnEditor = true;
 
         [ShowIf("useAdFakeOnEditor")]
-        public bool setAdFakeAvailble = true;
+        public bool adFakeAvailble = true;
 
         public bool Initialized { get; private set; } = false;
 
@@ -51,10 +52,10 @@ namespace GameFoundation.Mobile
                 return;
             }
 
-#if UNITY_EDITOR
+#if UNITY_EDITOR || UNITY_WEBGL
             if (useAdFakeOnEditor)
             {
-                handler = new AdFakeHandler(setAdFakeAvailble);
+                handler = new AdFakeHandler(adFakeAvailble);
             }
             else
             {
@@ -86,6 +87,11 @@ namespace GameFoundation.Mobile
             handler.DestroyBanner();
         }
 
+        public bool IsBanner()
+        {
+            return handler.IsBanner();
+        }
+
         public void RequestInterstitial()
         {
             handler.RequestInterstitial();
@@ -94,6 +100,15 @@ namespace GameFoundation.Mobile
         public void ShowInterstitial(UnityAction<bool> callback = null)
         {
             handler.ShowInterstitial(callback);
+        }
+
+        public async UniTask<bool> ShowInterstitialAsync()
+        {
+            var task = new UniTaskCompletionSource<bool>();
+            ShowInterstitial((success) => task.TrySetResult(success));
+            var result = await task.Task;
+            // await UniTask.SwitchToMainThread();
+            return result;
         }
 
         public bool IsInterstitalAvailable()
@@ -114,6 +129,15 @@ namespace GameFoundation.Mobile
         public void ShowReward(UnityAction<bool> callback = null)
         {
             handler.ShowReward(callback);
+        }
+
+        public async UniTask<bool> ShowRewardAsync()
+        {
+            var task = new UniTaskCompletionSource<bool>();
+            ShowReward((success) => task.TrySetResult(success));
+            var result = await task.Task;
+            // await UniTask.SwitchToMainThread();
+            return result;
         }
 
         public bool IsRewardAvailable()

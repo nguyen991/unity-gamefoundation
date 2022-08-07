@@ -37,6 +37,7 @@ namespace GameFoundation.Economy
         [Header("Data")]
         public RewardType type;
         public int limit;
+        public DurationTime limitTime;
         public DurationTime cooldown;
         public DurationTime expire;
         [SerializeField] protected List<RewardTableItem> rewardTable;

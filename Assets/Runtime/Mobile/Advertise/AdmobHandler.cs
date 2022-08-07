@@ -1,8 +1,16 @@
+#pragma warning disable CS0414
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
+using Cysharp.Threading.Tasks;
+using UniRx;
+
+#if UNITY_IOS
+using Unity.Advertisement.IosSupport;
+#endif
 
 #if GF_ADS
 using GoogleMobileAds.Api;
@@ -116,14 +124,17 @@ namespace GameFoundation.Mobile
 
             // Add Event Handlers
             bannerView.OnAdLoaded += (sender, args) => Debug.Log("[Ads] Banner ad loaded.");
-            bannerView.OnAdFailedToLoad += (sender, args) =>
+            bannerView.OnAdFailedToLoad += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 Debug.Log("[Ads] Banner ad failed to load: " + args.LoadAdError.GetMessage());
                 BIAdFailed(adUnitId, AdController.AdType.Banner, args.LoadAdError.GetResponseInfo()?.GetMediationAdapterClassName(), args.LoadAdError.GetMessage());
-            };
+            });
             bannerView.OnAdOpening += (sender, args) => Debug.Log("[Ads] Banner ad opened.");
             bannerView.OnAdClosed += (sender, args) => Debug.Log("[Ads] Banner ad closed.");
-            bannerView.OnPaidEvent += (sender, value) => BIPaidEvent(adUnitId, AdController.AdType.Banner, bannerView.GetResponseInfo()?.GetMediationAdapterClassName(), value);
+            bannerView.OnPaidEvent += (sender, value) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
+            {
+                BIPaidEvent(adUnitId, AdController.AdType.Banner, bannerView.GetResponseInfo()?.GetMediationAdapterClassName(), value);
+            });
 
             // Load a banner ad
             bannerView.LoadAd(CreateAdRequest());
@@ -137,6 +148,15 @@ namespace GameFoundation.Mobile
             {
                 bannerView.Destroy();
             }
+#endif
+        }
+
+        public bool IsBanner()
+        {
+#if GF_ADS
+            return bannerView != null;
+#else
+            return false;
 #endif
         }
         #endregion
@@ -165,20 +185,26 @@ namespace GameFoundation.Mobile
 
             // Add Event Handlers
             interstitialAd.OnAdLoaded += (sender, args) => Debug.Log("[Ads] Interstitial ad loaded.");
-            interstitialAd.OnAdFailedToLoad += (sender, args) =>
+            interstitialAd.OnAdFailedToLoad += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 Debug.Log("[Ads] Interstitial ad failed to load: " + args.LoadAdError.GetMessage());
                 BIAdFailed(adUnitId, AdController.AdType.Interstitial, args.LoadAdError.GetResponseInfo()?.GetMediationAdapterClassName(), args.LoadAdError.GetMessage());
                 adResultCallback?.Invoke(false);
-            };
+            });
             interstitialAd.OnAdOpening += (sender, args) => Debug.Log("[Ads] Interstitial ad opened.");
-            interstitialAd.OnAdClosed += (sender, args) =>
+            interstitialAd.OnAdClosed += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 RequestInterstitial();
                 adResultCallback?.Invoke(true);
-            };
-            interstitialAd.OnPaidEvent += (sender, value) => BIPaidEvent(adUnitId, AdController.AdType.Interstitial, interstitialAd.GetResponseInfo()?.GetMediationAdapterClassName(), value);
-            interstitialAd.OnAdDidRecordImpression += (sender, args) => BIRecordImpression(adUnitId, AdController.AdType.Interstitial, interstitialAd.GetResponseInfo()?.GetMediationAdapterClassName());
+            });
+            interstitialAd.OnPaidEvent += (sender, value) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
+            {
+                BIPaidEvent(adUnitId, AdController.AdType.Interstitial, interstitialAd.GetResponseInfo()?.GetMediationAdapterClassName(), value);
+            });
+            interstitialAd.OnAdDidRecordImpression += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
+            {
+                BIRecordImpression(adUnitId, AdController.AdType.Interstitial, interstitialAd.GetResponseInfo()?.GetMediationAdapterClassName());
+            });
 
             // Load an interstitial ad
             interstitialAd.LoadAd(CreateAdRequest());
@@ -201,6 +227,10 @@ namespace GameFoundation.Mobile
             {
                 adResultCallback = callback;
                 interstitialAd.Show();
+            }
+            else
+            {
+                callback?.Invoke(false);
             }
 #else
             callback?.Invoke(false);
@@ -237,26 +267,32 @@ namespace GameFoundation.Mobile
 
             // Add Event Handlers
             rewardedAd.OnAdLoaded += (sender, args) => Debug.Log("[Ads] Rewarded ad loaded.");
-            rewardedAd.OnAdFailedToLoad += (sender, args) =>
+            rewardedAd.OnAdFailedToLoad += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 Debug.Log("[Ads] Rewarded ad failed to load: " + args.LoadAdError.GetMessage());
                 BIAdFailed(adUnitId, AdController.AdType.Reward, args.LoadAdError.GetResponseInfo()?.GetMediationAdapterClassName(), args.LoadAdError.GetMessage());
-            };
+            });
             rewardedAd.OnAdOpening += (sender, args) => Debug.Log("[Ads] Rewarded ad opened.");
-            rewardedAd.OnPaidEvent += (sender, value) => BIPaidEvent(adUnitId, AdController.AdType.Reward, rewardedAd.GetResponseInfo()?.GetMediationAdapterClassName(), value);
-            rewardedAd.OnAdDidRecordImpression += (sender, args) => BIRecordImpression(adUnitId, AdController.AdType.Reward, rewardedAd.GetResponseInfo()?.GetMediationAdapterClassName());
-            rewardedAd.OnAdFailedToShow += (sender, args) =>
+            rewardedAd.OnPaidEvent += (sender, value) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
+            {
+                BIPaidEvent(adUnitId, AdController.AdType.Reward, rewardedAd.GetResponseInfo()?.GetMediationAdapterClassName(), value);
+            });
+            rewardedAd.OnAdDidRecordImpression += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
+            {
+                BIRecordImpression(adUnitId, AdController.AdType.Reward, rewardedAd.GetResponseInfo()?.GetMediationAdapterClassName());
+            });
+            rewardedAd.OnAdFailedToShow += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 adResultCallback?.Invoke(false);
-            };
-            rewardedAd.OnAdClosed += (sender, args) =>
+            });
+            rewardedAd.OnAdClosed += (sender, args) => MobileAdsEventExecutor.ExecuteInUpdate(() =>
             {
                 RequestReward();
 #if UNITY_EDITOR
                 earnedReward = true;
 #endif
                 adResultCallback?.Invoke(earnedReward);
-            };
+            });
             rewardedAd.OnUserEarnedReward += (sender, args) =>
             {
                 earnedReward = true;
@@ -284,6 +320,10 @@ namespace GameFoundation.Mobile
                 adResultCallback = callback;
                 earnedReward = false;
                 rewardedAd.Show();
+            }
+            else
+            {
+                callback?.Invoke(false);
             }
 #else
             callback?.Invoke(false);

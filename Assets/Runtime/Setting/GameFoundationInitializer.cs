@@ -1,30 +1,24 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using GameFoundation.Addressable;
+using GameFoundation.State;
+using GameFoundation.Utilities;
+using NaughtyAttributes;
 using UnityEngine;
-using UnityEngine.AddressableAssets;
 using UnityEngine.Events;
+
+#if UNITY_IOS
+using Unity.Notifications.iOS;
+#endif
 
 namespace GameFoundation
 {
-    public class GameFoundationInitializer : MonoBehaviour
+    public class GameFoundationInitializer : SingletonBehaviour<GameFoundationInitializer>
     {
         [Tooltip("If null, if will try to load from resources folder at start")]
         public GameFoundationSetting setting;
-
-        [Header("Data Layer")]
-        public Data.DataLayer.DataLayerType dataLayerType = Data.DataLayer.DataLayerType.Persistence;
-
-        [Header("Economy")]
-        public Economy.EconomyData economyData;
-
-        [Header("Advertise")]
-        public Mobile.AdController.AdConfig adConfig;
-        public bool useAdFakeOnEditor = true;
-
-        [Space(10)]
-        public List<AssetLabelReference> spriteAtlasLabels;
 
         [Space(10)]
         [Header("Callback")]
@@ -38,6 +32,11 @@ namespace GameFoundation
             {
                 return;
             }
+
+            DontDestroyOnLoad(gameObject);
+            MobileOptimize().Forget();
+            InitNotification();
+
             await UniTask.NextFrame();
 
             // load setting
@@ -48,7 +47,7 @@ namespace GameFoundation
 
             // wait for init data layer completed
             var dataLayer = Data.DataLayer.Instance;
-            dataLayer.Init(dataLayerType);
+            dataLayer.Init(setting.dataLayerType);
 
             // init model Repository
             State.Repository.Instance.DataLayer = dataLayer.Layer;
@@ -57,15 +56,16 @@ namespace GameFoundation
 
             // initialize sprite loader
             var spriteLoader = SpriteLoader.Instance;
-            spriteLoader.spriteAtlasLabels = spriteAtlasLabels;
+            spriteLoader.spriteAtlasLabels = setting.spriteAtlasLabels;
             tasks.Add(spriteLoader.Init());
 
             // initialize admob
             if (setting.enableAds)
             {
                 var adController = Mobile.AdController.Instance;
-                adController.config = adConfig;
-                adController.useAdFakeOnEditor = useAdFakeOnEditor;
+                adController.config = setting.adConfig;
+                adController.useAdFakeOnEditor = setting.useAdFakeOnEditor;
+                adController.adFakeAvailble = setting.adFakeAvailable;
                 adController.Init();
             }
 
@@ -76,9 +76,10 @@ namespace GameFoundation
             }
 
             // initialize economy
-            if (economyData != null)
+            if (setting.economyData != null)
             {
-                Economy.EconomyManager.Instance.Init(dataLayer.Layer, economyData);
+                Economy.EconomyManager.Instance.Init(dataLayer.Layer, setting.economyData);
+                Economy.EconomyManager.Instance.Load();
             }
 
             // wait for all task
@@ -86,6 +87,114 @@ namespace GameFoundation
 
             Initialized = true;
             onInitialized.Invoke(true);
+        }
+
+        private async UniTaskVoid MobileOptimize()
+        {
+            Input.multiTouchEnabled = setting.multiTouch;
+            Application.targetFrameRate = setting.fps;
+#if UNITY_ANDROID || UNITY_IOS
+            var rate = setting.designResolution.y / (float)Screen.currentResolution.height;
+            var res = new Vector2(Screen.currentResolution.width * rate, Screen.currentResolution.height * rate);
+            var fullScreen = Application.platform == RuntimePlatform.WebGLPlayer ? false : true;
+            Debug.Log($"Resolution {Screen.currentResolution.width},{Screen.currentResolution.height}");
+
+            // change resolution
+            Screen.SetResolution((int)res.x, (int)res.y, fullScreen);
+            await UniTask.NextFrame();
+            Debug.Log($"Change to resolution {Screen.currentResolution.width},{Screen.currentResolution.height}");
+#else
+            await UniTask.CompletedTask;
+#endif
+
+        }
+
+        private void InitNotification()
+        {
+#if UNITY_ANDROID || UNITY_IOS
+            var channel = new Mobile.Notification.GameNotificationChannel("default", "Default", "Default Channel");
+            Mobile.Notification.GameNotificationsManager.Instance.Initialize(channel);
+            if (setting.autoScheduleNotification)
+            {
+                ScheduleNotifications().Forget();
+            }
+#endif
+        }
+
+        public async UniTask ScheduleNotifications(bool cancelAll = true)
+        {
+            Debug.Log("ScheduleNotifications");
+#if UNITY_IOS
+            await iOSNotificationRequest();
+#else
+            await UniTask.CompletedTask;
+#endif
+
+#if UNITY_ANDROID || UNITY_IOS
+            if (cancelAll)
+            {
+                Mobile.Notification.GameNotificationsManager.Instance.CancelAllNotifications();
+            }
+
+            var manager = Mobile.Notification.GameNotificationsManager.Instance;
+            foreach (var notify in setting.notifications)
+            {
+                var deliver = DateTime.Now.ToLocalTime().ChangeTime(notify.Hour, notify.Minute);
+                if (deliver < DateTime.Now.ToLocalTime())
+                {
+                    deliver = deliver.AddDays(1);
+                }
+                Debug.Log($"Schedule notification at {deliver}");
+
+                var info = manager.CreateNotification();
+                info.Title = notify.Title;
+                info.Body = notify.Body;
+                info.DeliveryTime = deliver;
+                info.ShouldAutoCancel = true;
+
+                var scheduler = manager.ScheduleNotification(info);
+                scheduler.Reschedule = true;
+            }
+#endif
+        }
+
+#if UNITY_IOS
+        private IEnumerator iOSNotificationRequest()
+        {
+            var authorizationOption = AuthorizationOption.Alert | AuthorizationOption.Badge;
+            using (var req = new AuthorizationRequest(authorizationOption, true))
+            {
+                while (!req.IsFinished)
+                {
+                    yield return null;
+                };
+
+                string res = "\n RequestAuthorization:";
+                res += "\n finished: " + req.IsFinished;
+                res += "\n granted :  " + req.Granted;
+                res += "\n error:  " + req.Error;
+                res += "\n deviceToken:  " + req.DeviceToken;
+                Debug.Log(res);
+            }
+        }
+#endif
+
+        private void OnApplicationFocus(bool focus)
+        {
+            if (!focus && setting.saveOnLostFocus)
+            {
+                Economy.EconomyManager.Instance.Save();
+                Repository.Instance.SaveAll();
+            }
+        }
+
+        private void OnApplicationPause(bool pause)
+        {
+            if (pause && setting.saveOnLostFocus)
+            {
+                Economy.EconomyManager.Instance.Save();
+                Repository.Instance.SaveAll();
+            }
         }
     }
 }
