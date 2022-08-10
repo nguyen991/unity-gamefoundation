@@ -40,7 +40,8 @@ namespace GameFoundation.State
                 Load(key);
             }
 
-            di_container.RegisterInstance(model).AsSelf();
+            // register dependency injection
+            RegisterDI(model);
 
             return model;
         }
@@ -117,6 +118,11 @@ namespace GameFoundation.State
         public bool IsHaveSaveFile(string name)
         {
             return DataLayer.Exists(name);
+        }
+        
+        public void RegisterDI<T>(T obj)
+        {
+            di_container.RegisterInstance(obj).AsSelf();
         }
 
         public void ResolveDI<T>(T obj)
