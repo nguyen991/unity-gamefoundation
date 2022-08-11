@@ -50,7 +50,7 @@ namespace GameFoundation.State
         {
             models.Remove(model.Name);
             models.Remove($"Type {model.GetType()}");
-            di_container.RemoveInstance(model);
+            UnRegisterDI(model);
             return true;
         }
 
@@ -128,6 +128,11 @@ namespace GameFoundation.State
         public void ResolveDI<T>(T obj)
         {
             di_container.InjectAll(obj);
+        }
+        
+        public void UnRegisterDI<T>(T obj)
+        {
+            di_container.RemoveInstance(obj);
         }
     }
 }
