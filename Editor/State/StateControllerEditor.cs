@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace GameFoundation.Editor
 {
-    [CustomEditor(typeof(StateController<,>), true)]
+    [CustomEditor(typeof(StateController<,,>), true)]
     public class StateControllerEditor : UnityEditor.Editor
     {
         public override void OnInspectorGUI()

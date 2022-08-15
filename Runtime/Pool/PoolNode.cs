@@ -10,8 +10,6 @@ namespace GameFoundation.Pool
     [System.Serializable]
     class PoolNode
     {
-        public string id;
-
         public GameObject prefab = null;
 
         public AssetReference assetPref = null;

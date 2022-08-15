@@ -8,35 +8,11 @@ using UnityEngine;
 
 namespace GameFoundation.State
 {
-    public abstract class Controller : MonoBehaviour
+    public abstract class Controller<M, T> : MonoBehaviour where M : StateModel<T> where T: System.Enum
     {
-        protected Dictionary<string, Model> models = new Dictionary<string, Model>();
+        public abstract void ChangeState(T stateId);
 
-        public abstract void ChangeState(object ID);
-
-        public T GetModel<T>() where T : Model
-        {
-            if (models.TryGetValue(typeof(T).Name, out Model model))
-            {
-                return model as T;
-            }
-            model = GetComponent<StateModel<T>>()?.Model;
-            if (model == null)
-            {
-                // try get model from repository
-                model = Repository.Instance.Get<T>();
-            }
-            if (model != null)
-            {
-                models.Add(typeof(T).Name, model);
-            }
-            return model != null ? model as T : null;
-        }
-
-        public void ClearModels()
-        {
-            models.Clear();
-        }
+        public M Model { get; set; }
 
         protected CompositeDisposable disposables = new CompositeDisposable();
 
@@ -44,20 +20,22 @@ namespace GameFoundation.State
 
         private void OnDestroy()
         {
-            models.Clear();
             Disposable.Dispose();
         }
     }
 
     /// <summary>
-    /// StateController with "St" is the type of the StateScript. And "Ids" is the type of ID to compare.
+    /// StateController
+    /// S: StateScript Type
+    /// M: StateModel Type
+    /// T: StateID Type
     /// </summary>
-    public class StateController<St, IDs> : Controller where St : StateScript<IDs>
+    public class StateController<S, M, T> : Controller<M, T> where S : StateScript<M, T> where M : StateModel<T> where T: System.Enum 
     {
-        [SerializeField] protected St[] states;
-        [System.NonSerialized] protected St current = null;
+        [SerializeField] protected S[] states;
+        [System.NonSerialized] protected S current = null;
 
-        public IDs currentState => current != null ? current.ID : default;
+        public T currentState => current != null ? current.ID : default;
 
         private CancellationTokenSource cancelToken;
 
@@ -69,16 +47,16 @@ namespace GameFoundation.State
             }
         }
 
-        public override void ChangeState(object ID)
+        public override void ChangeState(T stateId)
         {
-            var state = states.FirstOrDefault(x => x.ID.Equals(ID));
+            var state = states.FirstOrDefault(x => x.ID.Equals(stateId));
             if (state)
             {
                 ChangeState(state);
             }
             else
             {
-                Debug.LogWarning("State not found: " + ID);
+                Debug.LogWarning("State not found: " + stateId);
             }
         }
 
@@ -98,7 +76,7 @@ namespace GameFoundation.State
             cancelToken.Dispose();
         }
 
-        public void ChangeState(St state)
+        public void ChangeState(S state)
         {
             if (state == current)
             {
@@ -107,7 +85,7 @@ namespace GameFoundation.State
             ChangeStateAsync(state).Forget();
         }
 
-        protected async UniTaskVoid ChangeStateAsync(St state)
+        protected async UniTaskVoid ChangeStateAsync(S state)
         {
             // check emit event state exit
             if (current != null)
@@ -148,8 +126,9 @@ namespace GameFoundation.State
             }
         }
 
-        protected virtual void OnStateChanged(St state)
+        protected virtual void OnStateChanged(S state)
         {
+            Model.State.Value = state.ID;
         }
     }
 }

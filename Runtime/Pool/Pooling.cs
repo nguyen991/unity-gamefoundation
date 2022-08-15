@@ -4,6 +4,7 @@ using System.Linq;
 using Cysharp.Threading.Tasks;
 using NaughtyAttributes;
 using UnityEngine;
+using UnityEngine.AddressableAssets;
 
 namespace GameFoundation.Pool
 {
@@ -11,8 +12,21 @@ namespace GameFoundation.Pool
     {
         public static readonly string MethodOnTake = "OnTakeFromPool";
         public static readonly string MethodOnReturn = "OnReturnToPool";
+
+        [SerializeField] private int defaultAddressesSize = 10;
+        [SerializeField] private List<AssetLabelReference> addresses;
         
-        [SerializeField] private GenericDictionary<string, PoolNode> pools = new GenericDictionary<string, PoolNode>();        
+        [SerializeField] private GenericDictionary<string, PoolNode> pools = new GenericDictionary<string, PoolNode>();
+
+        private async UniTaskVoid Start()
+        {
+            // load addressables
+            if (addresses.Count > 0)
+            {
+                var gameObjects = await Addressables.LoadAssetsAsync<GameObject>(addresses.Select(label => label.labelString), null, Addressables.MergeMode.Union);
+                await UniTask.WhenAll(gameObjects.Where(go => go != null).Select(go => AddPoolNode(go.name, go, defaultAddressesSize)));
+            }
+        }
 
         public async UniTask Reload()
         {
@@ -24,6 +38,12 @@ namespace GameFoundation.Pool
             if (pools.TryGetValue(id, out var pool))
             {
                 var node = await pool.Take<T>();
+                var poolRef = node.GetComponent<PoolingRef>();
+                if (poolRef == null)
+                {
+                    poolRef = node.gameObject.AddComponent<PoolingRef>();
+                }
+                poolRef.poolId = id;
                 node.transform.SetParent(parent, false);
                 node.gameObject.SetActive(true);
                 node.SendMessage(MethodOnTake, SendMessageOptions.DontRequireReceiver);
@@ -35,6 +55,19 @@ namespace GameFoundation.Pool
         public async UniTask<Transform> Take(string id, Transform parent = null)
         {
             return await Take<Transform>(id, parent);
+        }
+
+        public void Return(Transform node)
+        {
+            var poolRef = node.GetComponent<PoolingRef>();
+            if (poolRef)
+            {
+                Debug.LogError($"{node.name} is not in pool {poolRef.poolId}");
+            }
+            else
+            {
+                Return(poolRef.poolId, node);
+            }
         }
 
         public void Return(string id, Transform node)
@@ -67,7 +100,7 @@ namespace GameFoundation.Pool
             }
             else
             {
-                var pool = new PoolNode() { id = id, prefab = prefab, size = size };
+                var pool = new PoolNode() { prefab = prefab, size = size };
                 pools.Add(id, pool);
                 await pool.Reload(transform);
             }
