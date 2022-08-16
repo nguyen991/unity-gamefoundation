@@ -60,9 +60,9 @@ namespace GameFoundation.Pool
         public void Return(Transform node)
         {
             var poolRef = node.GetComponent<PoolingRef>();
-            if (poolRef)
+            if (poolRef == null)
             {
-                Debug.LogError($"{node.name} is not in pool {poolRef.poolId}");
+                Debug.LogError($"{node.name} is not have PoolingRef");
             }
             else
             {
