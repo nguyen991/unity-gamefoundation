@@ -32,8 +32,9 @@ namespace GameFoundation.Economy
 
         [JsonProperty] private Dictionary<string, ItemData> items;
 
-        [JsonIgnore] public UnityEvent onItemAdded = new UnityEvent();
-        [JsonIgnore] public UnityEvent onItemRemoved = new UnityEvent();
+        [JsonIgnore] public UnityEvent<Item, long> onItemAdded = new UnityEvent<Item, long>();
+        [JsonIgnore] public UnityEvent<Item, long> onItemRemoved = new UnityEvent<Item, long>();
+        [JsonIgnore] public UnityEvent<Item, long> onItemChanged = new UnityEvent<Item, long>();
 
         public InventoryManager(ItemCatalog catalog)
         {
@@ -128,7 +129,11 @@ namespace GameFoundation.Economy
                 items[key].instances.AddRange(newInstance);
 
                 // delay one frame and invoke
-                UniTask.DelayFrame(1).ContinueWith(() => onItemAdded.Invoke());
+                UniTask.DelayFrame(1).ContinueWith(() => 
+                {
+                    onItemAdded.Invoke(item, amount);
+                    onItemChanged.Invoke(item, TotalAmount(key));
+                });
 
                 return newInstance;
             }
@@ -145,18 +150,19 @@ namespace GameFoundation.Economy
                 }
 
                 // sub items
+                var count = amount;
                 data.instances.ForEach(instance =>
                 {
-                    if (amount > 0)
+                    if (count > 0)
                     {
-                        if (instance.amount >= amount)
+                        if (instance.amount >= count)
                         {
-                            instance.amount -= amount;
-                            amount = 0;
+                            instance.amount -= count;
+                            count = 0;
                         }
                         else
                         {
-                            amount -= instance.amount;
+                            count -= instance.amount;
                             instance.amount = 0;
                         }
                     }
@@ -164,7 +170,8 @@ namespace GameFoundation.Economy
 
                 // remove empty items
                 data.instances.RemoveAll(instance => instance.amount == 0);
-                onItemRemoved.Invoke();
+                onItemRemoved.Invoke(data.item, amount);
+                onItemChanged.Invoke(data.item, TotalAmount(key));
                 return true;
             }
             return false;
@@ -184,7 +191,9 @@ namespace GameFoundation.Economy
                     items[instance.key].instances.Remove(instance);
                 }
 
-                onItemRemoved.Invoke();
+                var item = Find(instance.key);
+                onItemRemoved.Invoke(item, instance.amount);
+                onItemChanged.Invoke(item, TotalAmount(item.key));
                 return true;
             }
             return false;
