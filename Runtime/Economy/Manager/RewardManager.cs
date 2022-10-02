@@ -47,7 +47,6 @@ namespace GameFoundation.Economy
                     if (!rewardsRecorded.TryGetValue(key, out RewardRecord record))
                     {
                         record = new RewardRecord();
-                        rewardsRecorded.Add(key, record);
                     };
 
                     // check if the reward table available
@@ -64,6 +63,12 @@ namespace GameFoundation.Economy
                         record.step += 1;
                     }
                     record.lastClaimed = DateTime.Now.Ticks;
+                    
+                    // add record
+                    if (rewardsRecorded.ContainsKey(key))
+                    {
+                        rewardsRecorded.Add(key, record);
+                    }
 
                     // grant rewards
                     return GrantReward(reward, record.step - 1);
