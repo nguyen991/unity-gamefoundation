@@ -66,7 +66,7 @@ namespace GameFoundation.Economy
                     record.lastClaimed = DateTime.Now.Ticks;
 
                     // grant rewards
-                    return GrantReward(reward, record.claimed);
+                    return GrantReward(reward, record.step - 1);
                 }
             }
             return null;
@@ -78,12 +78,12 @@ namespace GameFoundation.Economy
             return rewards.Select(it => reward.RewardTable.IndexOf(it)).ToList();
         }
 
-        private List<RewardTableItem> GrantReward(Reward reward, int claimed)
+        private List<RewardTableItem> GrantReward(Reward reward, int index)
         {
             List<RewardTableItem> items = new List<RewardTableItem>();
             if (reward.type == Reward.RewardType.Progressive)
             {
-                items.Add(reward.RewardTable[claimed - 1]);
+                items.Add(reward.RewardTable[index]);
             }
             else if (reward.type == Reward.RewardType.Randomized)
             {
