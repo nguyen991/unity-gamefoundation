@@ -65,7 +65,7 @@ namespace GameFoundation.Economy
                     record.lastClaimed = DateTime.Now.Ticks;
                     
                     // add record
-                    if (rewardsRecorded.ContainsKey(key))
+                    if (!rewardsRecorded.ContainsKey(key))
                     {
                         rewardsRecorded.Add(key, record);
                     }
