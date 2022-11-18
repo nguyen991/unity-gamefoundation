@@ -43,17 +43,18 @@ namespace GameFoundation.Pool
 
         public async UniTask<T> Take<T>() where T : Component
         {
-            var instance = pooled.FirstOrDefault(n => !n.activeInHierarchy);
-            if (instance != null)
-            {
-                pooled.Remove(instance);
-                return instance.GetComponent<T>();
-            }
-            else
+            if (pooled.Count == 0)
             {
                 // create new instance if needed
                 var go = await Create();
                 return go.GetComponent<T>();
+            }
+            else
+            {
+                // get pooled instance
+                var instance = pooled.ElementAt(0);
+                pooled.Remove(instance);
+                return instance.GetComponent<T>();
             }
         }
 

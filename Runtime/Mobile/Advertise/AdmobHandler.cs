@@ -54,7 +54,9 @@ namespace GameFoundation.Mobile
                 .SetTestDeviceIds(deviceIds).build();
 
             // Initialize the Google Mobile Ads SDK.
+#if UNITY_IOS
             MobileAds.SetiOSAppPauseOnBackground(true);
+#endif
             MobileAds.SetRequestConfiguration(requestConfiguration);
             MobileAds.Initialize(status =>
             {

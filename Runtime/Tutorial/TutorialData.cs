@@ -133,12 +133,12 @@ namespace GameFoundation.Tutorial
                 anim.Play(handClip.name);
 
                 // update touch zone
-                // var rect = interactive.GetComponent<RectTransform>();
-                // if (rect)
-                // {
-                //     touch.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
-                // }
-                touch.GetComponent<RectTransform>().anchoredPosition = hand.GetComponent<RectTransform>().anchoredPosition;
+                var rect = interactive.GetComponent<RectTransform>();
+                if (rect)
+                {
+                    touch.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
+                }
+                touch.transform.position = interactive.transform.position;
             }
             else
             {

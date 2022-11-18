@@ -38,7 +38,7 @@ namespace GameFoundation.Economy
 #endif
         }
 
-        public Transaction Get(string key)
+        public Transaction Find(string key)
         {
             return catalog.Find(key);
         }

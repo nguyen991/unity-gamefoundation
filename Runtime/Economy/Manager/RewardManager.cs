@@ -15,6 +15,7 @@ namespace GameFoundation.Economy
         {
             public int claimed = 0;
             public int step = 0;
+            public long firstClaimed = 0;
             public long lastClaimed = 0;
         }
 
@@ -62,7 +63,11 @@ namespace GameFoundation.Economy
                         record.claimed += 1;
                         record.step += 1;
                     }
+
                     record.lastClaimed = DateTime.Now.Ticks;
+                    if (record.firstClaimed <= 0) {
+                        record.firstClaimed = record.lastClaimed;
+                    }
                     
                     // add record
                     if (!rewardsRecorded.ContainsKey(key))
@@ -187,6 +192,26 @@ namespace GameFoundation.Economy
             return TimeSpan.Zero;
         }
 
+        public TimeSpan UtilExpire(string key)
+        {
+            ResetExpiredReward(key);
+            var reward = Find(key);
+            if (reward.expire.duration > 0 && rewardsRecorded.TryGetValue(key, out RewardRecord record))
+            {
+                long endTime = 0;
+                if (reward.expire.type == Reward.DurationTime.DurationType.Days)
+                {
+                    endTime = new DateTime(record.firstClaimed).Reset().AddDays(reward.expire.duration).Ticks;
+                }
+                else
+                {
+                    endTime = new DateTime(record.firstClaimed).AddMinutes(reward.expire.duration).Ticks;
+                }
+                return TimeSpan.FromTicks(endTime - DateTime.Now.Ticks);
+            }
+            return TimeSpan.Zero;
+        }
+
         public bool Reset(string key)
         {
             return rewardsRecorded.Remove(key);
@@ -196,7 +221,7 @@ namespace GameFoundation.Economy
         {
             var reward = Find(key);
             if (rewardsRecorded.TryGetValue(key, out RewardRecord record) &&
-                reward.expire.duration > 0 && IsExpireDuration(reward.expire, record.lastClaimed)
+                reward.expire.duration > 0 && IsExpireDuration(reward.expire, record.firstClaimed)
             )
             {
                 Reset(key);
