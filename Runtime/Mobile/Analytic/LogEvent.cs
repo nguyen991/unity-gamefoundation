@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Unity.Services.Analytics;
 
 namespace GameFoundation.Mobile
 {
@@ -34,25 +35,42 @@ namespace GameFoundation.Mobile
 
             public override string ToString()
             {
-                if (stringValue != null)
+                return Value.ToString();
+            }
+
+            public object Value
+            {
+                get
                 {
-                    return stringValue;
+                    if (stringValue != null)
+                    {
+                        return stringValue;
+                    }
+                    if (longValue != null)
+                    {
+                        return longValue;
+                    }
+                    if (doubleValue != null)
+                    {
+                        return doubleValue;
+                    }
+                    return "";
                 }
-                if (longValue != null)
-                {
-                    return longValue.ToString();
-                }
-                if (doubleValue != null)
-                {
-                    return doubleValue.ToString();
-                }
-                return "";
             }
         }
 
         public static void Log(string eventName, params Parameter[] parameters)
         {
+            Debug.Log($"----[Tracking]: {eventName}\n{string.Join("\n", parameters.Select(p => $"{p.name}={p.ToString()}"))}");
             FirebaseInstance.Log(eventName, parameters);
+            AnalyticsService.Instance.CustomData(
+                eventName,
+                parameters.Aggregate(new Dictionary<string, object>(), (dict, param) => 
+                {
+                    dict.Add(param.name, param.Value);
+                    return dict;
+                })
+            );
         }
     }
 }

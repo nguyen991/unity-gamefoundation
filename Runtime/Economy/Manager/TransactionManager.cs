@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using GameFoundation.Mobile;
 using Cysharp.Threading.Tasks;
+using UnityEngine.Events;
 
 #if GF_IAP
 using UnityEngine.Purchasing;
@@ -12,6 +13,9 @@ namespace GameFoundation.Economy
 {
     public class TransactionManager
     {
+        public UnityEvent onPurchaseBegin;
+        public UnityEvent onPurchaseCompleted;
+
         private TransactionCatalog catalog;
         private WalletManager wallet;
         private InventoryManager inventory;
@@ -26,7 +30,9 @@ namespace GameFoundation.Economy
         {
             this.catalog = catalog;
             this.wallet = wallet;
-            this.inventory = inventory;
+            this.inventory = inventory;            
+            onPurchaseBegin = new UnityEvent();
+            onPurchaseCompleted = new UnityEvent();
 
 #if GF_IAP
             // initialize IAP Listener
@@ -55,6 +61,7 @@ namespace GameFoundation.Economy
 
         public async UniTask RestoreIAP()
         {
+            onPurchaseBegin.Invoke();
 #if GF_IAP
             var task = new UniTaskCompletionSource<bool>();
             iapListener.Restore(task);
@@ -62,6 +69,7 @@ namespace GameFoundation.Economy
 #else
             await UniTask.CompletedTask;
 #endif
+            onPurchaseCompleted.Invoke();
         }
 
         public async UniTask<TransactionData> BeginTransaction(string key)
@@ -128,6 +136,7 @@ namespace GameFoundation.Economy
 
         private async UniTask<bool> IapProductTransaction(Transaction transaction, TransactionData result)
         {
+            onPurchaseBegin.Invoke();
             iapTask = new UniTaskCompletionSource<bool>();
 #if GF_IAP
             iapListener.Purchase(transaction.Cost.productId);
@@ -135,6 +144,11 @@ namespace GameFoundation.Economy
             iapTask.TrySetResult(true);
 #endif
             var success = await iapTask.Task;
+            onPurchaseCompleted.Invoke();
+
+            // clear task
+            iapTask = null;
+
             if (success)
             {
                 AddReward(transaction, result);

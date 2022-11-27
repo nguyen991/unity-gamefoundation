@@ -28,8 +28,6 @@ namespace GameFoundation.Mobile
 
         public static void Log(string eventName, params Mobile.LogEvent.Parameter[] parameters)
         {
-            Debug.Log($"----[Tracking]: {eventName}\n{string.Join("\n", parameters.Select(p => $"{p.name}={p.ToString()}"))}");
-
 #if GF_FIREBASE
             var fb_params = new List<Firebase.Analytics.Parameter>();
             foreach (var value in parameters)
@@ -39,7 +37,7 @@ namespace GameFoundation.Mobile
             Firebase.Analytics.FirebaseAnalytics.LogEvent(eventName, fb_params.ToArray());
 
             // AppsFlyer
-            AppsFlyerSDK.AppsFlyer.sendEvent(eventName, ap_params);
+            // AppsFlyerSDK.AppsFlyer.sendEvent(eventName, ap_params);
 #endif
         }
 
