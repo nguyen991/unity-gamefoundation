@@ -137,8 +137,12 @@ namespace GameFoundation.Tutorial
                 if (rect)
                 {
                     touch.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
+                    touch.GetComponent<RectTransform>().anchoredPosition = tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position);
                 }
-                touch.transform.position = interactive.transform.position;
+                else
+                {
+                    touch.transform.position = interactive.transform.position;
+                }
             }
             else
             {
