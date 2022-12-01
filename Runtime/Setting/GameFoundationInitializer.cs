@@ -188,7 +188,7 @@ namespace GameFoundation
 
         private void OnApplicationFocus(bool focus)
         {
-            if (!focus && setting.saveOnLostFocus)
+            if (Initialized && !focus && setting.saveOnLostFocus)
             {
                 Economy.EconomyManager.Instance.Save();
                 Repository.Instance.SaveAll();
@@ -197,7 +197,7 @@ namespace GameFoundation
 
         private void OnApplicationPause(bool pause)
         {
-            if (pause && setting.saveOnLostFocus)
+            if (Initialized && pause && setting.saveOnLostFocus)
             {
                 Economy.EconomyManager.Instance.Save();
                 Repository.Instance.SaveAll();
