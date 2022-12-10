@@ -9,6 +9,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using Unity.Services.Core;
 using Unity.Services.Core.Environments;
+using NaughtyAttributes;
 
 #if UNITY_IOS
 using Unity.Notifications.iOS;
@@ -21,6 +22,9 @@ namespace GameFoundation
         [Tooltip("If null, if will try to load from resources folder at start")]
         public GameFoundationSetting setting;
 
+        [Header("Unity Services")]
+        public bool enableUnityServices = false;
+        [ShowIf("enableUnityServices")]
         public string environment = "production";
 
         [Space(10)]
@@ -43,8 +47,11 @@ namespace GameFoundation
             await UniTask.NextFrame();
 
             // init game service
-            var options = new InitializationOptions().SetEnvironmentName(environment);
-            await UnityServices.InitializeAsync(options);
+            if (enableUnityServices)
+            {
+                var options = new InitializationOptions().SetEnvironmentName(environment);
+                await UnityServices.InitializeAsync(options);
+            }
 
             // load setting
             if (setting == null)
