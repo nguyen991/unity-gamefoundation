@@ -15,16 +15,26 @@ namespace GameFoundation.Tutorial
         Hand = 1 << 1,
         Top = 1 << 2,
         Mask = 1 << 3,
+        Touch = 1 << 4,
     }
 
     [System.Serializable]
     public class TutorialStep
     {
+        public float delay = 0;
         public string eventName;
         public string focus;
         public FocusMode focusMode;
-        public AnimationClip handClip = null;
+        public string handClip = null;
+        public List<string> actives = new List<string>();
         public List<string> deactives = new List<string>();
+
+        [Header("Message Box")]
+        [TextArea]
+        public string message = "";
+        public Vector2 messageBoxPosition = Vector2.zero;
+        public bool alignWithFocus = true;
+        public string messageBoxClip = null;
     }
 
     [CreateAssetMenu(fileName = "Tutorial", menuName = "Game Foundation/Tutorial/Create Tutorial")]
@@ -37,7 +47,7 @@ namespace GameFoundation.Tutorial
         private GameObject interactive;
         private Transform interactiveParent;
         private Vector3 interactiveOriginPosition;
-        private List<GameObject> deactiveObjects;
+
         private int currentStep = 0;
 
         public void Active(TutorialManager tutorial)
@@ -45,7 +55,6 @@ namespace GameFoundation.Tutorial
             this.tutorial = tutorial;
             interactive = null;
             currentStep = -1;
-            tutorial.touch.onClick.AddListener(OnTouch);
             NextStep();
         }
 
@@ -53,7 +62,7 @@ namespace GameFoundation.Tutorial
         {
             currentStep++;
 
-            if (currentStep > 1 && !string.IsNullOrEmpty(steps[currentStep - 1].eventName))
+            if (currentStep > 0 && !string.IsNullOrEmpty(steps[currentStep - 1].eventName))
             {
                 tutorial.Model.endEventName.Execute(steps[currentStep - 1].eventName);
             }
@@ -72,12 +81,21 @@ namespace GameFoundation.Tutorial
             var tut = steps[step];
             var container = tutorial.transform;
             var hand = tutorial.hand;
-            var handClip = tut.handClip != null ? tut.handClip : tutorial.handClip;
+            var handClip = string.IsNullOrEmpty(tut.handClip) ? tutorial.handClip : tut.handClip;
+            var messageClip = tut.messageBoxClip != null ? tut.messageBoxClip : tutorial.messageBoxClip;
             var touch = tutorial.touch;
 
-            if (step > 0)
+            DeactiveStep(step - 1);
+
+            // delay
+            if (tut.delay > 0.001f)
+                await UniTask.Delay(System.TimeSpan.FromSeconds(tut.delay), ignoreTimeScale: true);
+
+            // active game objects
+            if (steps[step].actives.Count() > 0)
             {
-                DeactiveStep(step - 1);
+                steps[step].actives.Select(path => GameObject.Find(path)).Where(obj => obj != null).ToList().ForEach(obj => obj.SetActive(true));
+                await UniTask.NextFrame();
             }
 
             // find interactive object
@@ -92,11 +110,14 @@ namespace GameFoundation.Tutorial
             }
 
             // deactivate game objects
-            deactiveObjects = steps[step].deactives
+            steps[step].deactives
                 .Select(path => GameObject.Find(path))
                 .Where(obj => obj != null)
-                .ToList();
-            deactiveObjects.ForEach(obj => obj.SetActive(false));
+                .ToList()
+                .ForEach(obj => obj.SetActive(false));
+
+            // focus position
+            var focusPosition = interactive ? tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position) : Vector2.zero;
 
             // check mode had Top
             if (tut.focusMode.HasFlag(FocusMode.Top))
@@ -113,52 +134,51 @@ namespace GameFoundation.Tutorial
             {
                 // focus hand
                 hand.SetActive(true);
-                if (tut.focusMode.HasFlag(FocusMode.Top))
-                {
-                    hand.transform.position = interactive.transform.position;
-                }
-                else
-                {
-                    hand.GetComponent<RectTransform>().anchoredPosition = tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position);
-                }
+                hand.GetComponent<RectTransform>().anchoredPosition = focusPosition;
 
                 // play animation
-                var anim = hand.GetComponent<Animation>();
-                if (anim == null)
+                var anim = hand.GetComponent<Animator>();
+                if (anim != null)
                 {
-                    anim = hand.AddComponent<Animation>();
-                }
-                anim.clip = handClip;
-                anim.AddClip(handClip, handClip.name);
-                anim.Play(handClip.name);
-
-                // update touch zone
-                var rect = interactive.GetComponent<RectTransform>();
-                if (rect)
-                {
-                    touch.GetComponent<RectTransform>().sizeDelta = rect.sizeDelta;
-                    touch.GetComponent<RectTransform>().anchoredPosition = tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position);
-                }
-                else
-                {
-                    touch.transform.position = interactive.transform.position;
+                    anim.Play(handClip);
                 }
             }
             else
             {
-                hand.GetComponent<Animation>()?.Stop();
                 hand.SetActive(false);
+            }
+
+            // update touch zone
+            touch.interactable = tut.focusMode.HasFlag(FocusMode.Touch) || tut.focusMode.HasFlag(FocusMode.Hand);
+            if (touch.interactable)
+            {
+                touch.GetComponent<RectTransform>().anchoredPosition = tut.focusMode.HasFlag(FocusMode.Touch) ? Vector2.zero : focusPosition;
+                var touchSize = tut.focusMode.HasFlag(FocusMode.Touch) || interactive == null ? tutorial.Canvas.GetComponent<RectTransform>().sizeDelta : interactive.GetComponent<RectTransform>().sizeDelta;
+                touch.GetComponent<RectTransform>().sizeDelta = touchSize;
             }
 
             // check mode has Mask
             if (tut.focusMode.HasFlag(FocusMode.Mask))
             {
-                tutorial.mask.transform.position = hand.transform.position;
                 tutorial.mask.SetActive(true);
+                tutorial.mask.GetComponent<RectTransform>().anchoredPosition = focusPosition;
             }
             else
             {
                 tutorial.mask.SetActive(false);
+            }
+
+            // show message box
+            if (string.IsNullOrEmpty(tut.message))
+            {
+                tutorial.messageBox.SetActive(false);
+            }
+            else
+            {
+                var boxPosition = tut.alignWithFocus ?
+                    new Vector2(tut.messageBoxPosition.x, focusPosition.y + tut.messageBoxPosition.y) :
+                    tut.messageBoxPosition;
+                tutorial.ShowMessageBox(tut.message, messageClip, boxPosition);
             }
 
             // trigger event name
@@ -166,26 +186,50 @@ namespace GameFoundation.Tutorial
             {
                 tutorial.Model.eventName.Execute(tut.eventName);
             }
+
+            if (touch.interactable)
+            {
+                await UniTask.Delay(System.TimeSpan.FromSeconds(0.5f), ignoreTimeScale: true);
+                touch.onClick.AddListener(OnTouch);
+            }
         }
 
         public void DeactiveStep(int step)
         {
-            // actives game objects
-            deactiveObjects.ForEach(obj => obj.SetActive(true));
-            deactiveObjects.Clear();
-
-            // reset interactive object parent
-            if (interactive && steps[step].focusMode.HasFlag(FocusMode.Top))
+            if (step > 0)
             {
-                interactive.transform.SetParent(interactiveParent, false);
-                interactive.transform.localPosition = interactiveOriginPosition;
+                // actives game objects
+                steps[step].deactives
+                    .Select(path => GameObject.Find(path))
+                    .Where(obj => obj != null)
+                    .ToList()
+                    .ForEach(obj => obj.SetActive(true));
+
+                // reset interactive object parent
+                if (interactive && steps[step].focusMode.HasFlag(FocusMode.Top))
+                {
+                    interactive.transform.SetParent(interactiveParent, false);
+                    interactive.transform.localPosition = interactiveOriginPosition;
+                }
             }
+
+            tutorial.mask.SetActive(false);
+            tutorial.hand.SetActive(false);
+            tutorial.touch.onClick.RemoveAllListeners();
         }
 
         private void OnTouch()
         {
             // active button action
-            interactive?.GetComponentInChildren<Button>()?.onClick.Invoke();
+            if (!steps[currentStep].focusMode.HasFlag(FocusMode.Touch) && interactive != null)
+            {
+                var button = interactive.GetComponentInChildren<Button>();
+                var toggle = interactive.GetComponentInChildren<Toggle>();
+                if (button != null)
+                    button.onClick.Invoke();
+                else if (toggle != null)
+                    toggle.isOn = true;
+            }
 
             // next step
             NextStep();
@@ -194,8 +238,9 @@ namespace GameFoundation.Tutorial
         private void OnCompleted()
         {
             DeactiveStep(currentStep - 1);
-            tutorial.touch.onClick.RemoveListener(OnTouch);
+            tutorial.touch.onClick.RemoveAllListeners();
             tutorial.OnCompleted(this);
+            tutorial.hand.SetActive(false);
         }
     }
 }
