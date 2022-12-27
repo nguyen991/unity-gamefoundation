@@ -1,0 +1,8 @@
+using System.Collections;
+using System.Collections.Generic;
+using GameFoundation.State;
+using UnityEngine;
+
+public class __MODEL__ : StateModel<__STATE_ID__>
+{
+}

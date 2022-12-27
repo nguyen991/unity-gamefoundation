@@ -37,8 +37,9 @@ namespace GameFoundation.Economy
             return catalog.Find(key);
         }
 
-        public List<RewardTableItem> Claim(string key, bool forceClaim = false)
+        public RewardTableItem Claim(string key, out int rewardTableIndex, bool forceClaim = false)
         {
+            rewardTableIndex = -1;
             if (IsClaimable(key) || forceClaim)
             {
                 Reward reward = Find(key);
@@ -76,7 +77,7 @@ namespace GameFoundation.Economy
                     }
 
                     // grant rewards
-                    return GrantReward(reward, record.step - 1);
+                    return GrantReward(reward, record.step - 1, out rewardTableIndex);
                 }
             }
             return null;
@@ -88,12 +89,14 @@ namespace GameFoundation.Economy
             return rewards.Select(it => reward.RewardTable.IndexOf(it)).ToList();
         }
 
-        private List<RewardTableItem> GrantReward(Reward reward, int index)
+        private RewardTableItem GrantReward(Reward reward, int index, out int rewardTableIndex)
         {
-            List<RewardTableItem> items = new List<RewardTableItem>();
+            RewardTableItem rewardItem = null;
+            rewardTableIndex = -1;
             if (reward.type == Reward.RewardType.Progressive)
             {
-                items.Add(reward.RewardTable[index]);
+                rewardItem = reward.RewardTable[index];
+                rewardTableIndex = index;
             }
             else if (reward.type == Reward.RewardType.Randomized)
             {
@@ -102,7 +105,8 @@ namespace GameFoundation.Economy
                 {
                     if (r <= reward.RewardTable[i].percent)
                     {
-                        items.Add(reward.RewardTable[i]);
+                        rewardItem = reward.RewardTable[i];
+                        rewardTableIndex = i;
                         break;
                     }
                     r -= reward.RewardTable[i].percent;
@@ -110,13 +114,10 @@ namespace GameFoundation.Economy
             }
 
             // increase currency and inventory
-            items.ForEach(it =>
-            {
-                it.currencies.ForEach(c => wallet.Add(c.item.key, c.amount));
-                it.items.ForEach(i => inventory.Create(i.item.key, i.amount));
-            });
+            rewardItem.currencies.ForEach(c => wallet.Add(c.item.key, c.amount));
+            rewardItem.items.ForEach(i => inventory.Create(i.item.key, i.amount));
 
-            return items;
+            return rewardItem;
         }
 
         public bool IsClaimable(string key)

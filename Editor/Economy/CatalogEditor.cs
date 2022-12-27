@@ -25,6 +25,7 @@ namespace GameFoundation.Editor.Economy
         protected string title = "";
 
         private ReorderableList catalogListReorder;
+        private ReorderableList tagListReorder;
 
         public CatalogEditor(string title)
         {
@@ -148,6 +149,38 @@ namespace GameFoundation.Editor.Economy
             selectedItem = item;
             serializedObject?.Dispose();
             serializedObject = item ? new SerializedObject(item) : null;
+
+            if (serializedObject != null)
+            {
+                // create tag list
+                var tagProperty = serializedObject.FindProperty("tags");
+                tagListReorder = new ReorderableList(serializedObject, tagProperty, true, true, true, true);
+                tagListReorder.onAddDropdownCallback = (Rect buttonRect, ReorderableList l) => {
+                    var menu = new GenericMenu();
+                    menu.AddItem(new GUIContent("Add New"), false, AddTag, null);
+                    menu.AddItem(new GUIContent("----------"), false, null);
+                    Tags().Where(tag => !selectedItem.IsHaveTag(tag)).ToList().ForEach(tag => menu.AddItem(new GUIContent(tag), false, AddTag, tag));
+                    menu.ShowAsContext();
+                };
+                tagListReorder.drawHeaderCallback = (Rect rect) => EditorGUI.LabelField(rect, "Tags");
+                tagListReorder.drawElementCallback = (Rect rect, int index, bool isActive, bool isFocused) => {
+                    var element = tagProperty.GetArrayElementAtIndex(index);
+                    rect.height = EditorGUIUtility.singleLineHeight;
+                    rect.y += 2;
+                    EditorGUI.PropertyField(rect, element, GUIContent.none);
+                };
+            }
+            else
+            {
+                tagListReorder  = null;
+            }
+        }
+
+        protected void AddTag(object value)
+        {
+            var tag = value != null ? value as string : "";
+            if (!selectedItem.IsHaveTag(tag))
+                selectedItem.tags.Add(tag);
         }
 
         private void DrawItem()
@@ -162,9 +195,12 @@ namespace GameFoundation.Editor.Economy
             GUILayout.BeginVertical("GroupBox");
             EditorGUILayout.TextField("Key", selectedItem.key);
             selectedItem.display = EditorGUILayout.TextField("Display", selectedItem.display);
-            EditorGUILayout.PropertyField(serializedObject.FindProperty("tags"), true);
-            // DrawTags();
+
+            EditorGUILayout.Space();
+            tagListReorder?.DoLayoutList();
+            EditorGUILayout.Space();
             EditorGUILayout.PropertyField(serializedObject.FindProperty("properties"), true);
+            
             GUILayout.EndVertical();
 
             // item custom data
@@ -192,23 +228,16 @@ namespace GameFoundation.Editor.Economy
             serializedObject?.ApplyModifiedProperties();
         }
 
-        // private void DrawTags()
-        // {
-        //     GUILayout.BeginHorizontal();
-        //     selectedItem.tags.ForEach(tag =>
-        //     {
-        //         GUILayout.BeginHorizontal(GUILayout.Width(100));
-        //         GUILayout.Label(tag);
-        //         if (GUILayout.Button("", GUI.skin.FindStyle("ToolbarSeachCancelButton")))
-        //         {
-        //             // selectedItem.tags.Remove(tag);
-        //             Debug.Log("Remove Tag " + tag);
-        //         }
-        //         GUILayout.EndHorizontal();
-        //     });
-        //     GUILayout.EndHorizontal();
-        // }
-
+        private IEnumerable<string> Tags()
+        {
+            var tags = new List<string>();
+            economyData.currencyCatalog.Items.ForEach(it => { if(tags != null) tags.AddRange(it.tags); });
+            economyData.itemCatalog.Items.ForEach(it => { tags.AddRange(it.tags);  });
+            economyData.transactionCatalog.Items.ForEach(it => { tags.AddRange(it.tags);  });
+            economyData.rewardCatalog.Items.ForEach(it => { tags.AddRange(it.tags);  });
+            return tags.Distinct().Where(it => !string.IsNullOrEmpty(it));
+        }
+       
         protected virtual void DrawCustomItemData()
         {
         }
@@ -236,7 +265,7 @@ namespace GameFoundation.Editor.Economy
                 var item = ScriptableObject.CreateInstance<T>();
                 item.name = $"{title}_{newKey}";
                 item.key = newKey;
-                item.display = newKey[0].ToString().ToUpper() + newKey.Substring(1);
+                item.display = ObjectNames.NicifyVariableName(newKey);
                 catalog.Items.Add(item);
 
                 // update asset database

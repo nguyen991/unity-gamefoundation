@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace GameFoundation.Economy
@@ -10,6 +11,10 @@ namespace GameFoundation.Economy
         public float percent;
         public List<TransactionItem<Currency>> currencies = new List<TransactionItem<Currency>>();
         public List<TransactionItem<Item>> items = new List<TransactionItem<Item>>();
+        public List<TransactionItem<CatalogItem>> rewards => 
+            currencies.Select(c => new TransactionItem<CatalogItem>() { item = c.item, amount = c.amount })
+            .Concat(items.Select(c => new TransactionItem<CatalogItem>() { item = c.item, amount = c.amount }))
+            .ToList();
     }
 
     [System.Serializable]

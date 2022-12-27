@@ -172,7 +172,7 @@ namespace GameFoundation.Editor.Economy
             }
             if (GUILayout.Button("Claim"))
             {
-                EconomyManager.Instance.Reward.Claim(selectedItem.key, true);
+                EconomyManager.Instance.Reward.Claim(selectedItem.key, out int tableIndex, true);
             }
             if (GUILayout.Button("Reset"))
             {

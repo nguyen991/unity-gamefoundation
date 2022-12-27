@@ -1,0 +1,17 @@
+using System.Collections;
+using System.Collections.Generic;
+using GameFoundation.State;
+using UnityEngine;
+
+public enum __STATE_ID__
+{
+    __STATES__
+}
+
+public abstract class __STATE__ : StateScript<__MODEL__, __STATE_ID__>
+{
+}
+
+public class __STATE_CONTROLLER__ : StateController<__STATE__, __MODEL__, __STATE_ID__>
+{
+}
