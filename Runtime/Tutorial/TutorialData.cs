@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 using GameFoundation.Utilities;
+using UnityEngine.XR;
 
 namespace GameFoundation.Tutorial
 {
@@ -117,7 +118,7 @@ namespace GameFoundation.Tutorial
                 .ForEach(obj => obj.SetActive(false));
 
             // focus position
-            var focusPosition = interactive ? tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position) : Vector2.zero;
+            var focusPosition = interactive ? tutorial.Canvas.WorldToCanvasPosition(interactive.transform.position) : Vector2.zero;            
 
             // check mode had Top
             if (tut.focusMode.HasFlag(FocusMode.Top))
@@ -135,12 +136,14 @@ namespace GameFoundation.Tutorial
                 // focus hand
                 hand.SetActive(true);
                 hand.GetComponent<RectTransform>().anchoredPosition = focusPosition;
+                Debug.Log(focusPosition);
 
                 // play animation
                 var anim = hand.GetComponent<Animator>();
                 if (anim != null)
                 {
-                    anim.Play(handClip);
+                    anim.enabled = true;
+                    anim.Play(handClip);                    
                 }
             }
             else
@@ -153,7 +156,15 @@ namespace GameFoundation.Tutorial
             if (touch.interactable)
             {
                 touch.GetComponent<RectTransform>().anchoredPosition = tut.focusMode.HasFlag(FocusMode.Touch) ? Vector2.zero : focusPosition;
-                var touchSize = tut.focusMode.HasFlag(FocusMode.Touch) || interactive == null ? tutorial.Canvas.GetComponent<RectTransform>().sizeDelta : interactive.GetComponent<RectTransform>().sizeDelta;
+                var touchSize = new Vector2(0, 0);
+                if (tut.focusMode.HasFlag(FocusMode.Touch) || interactive == null)
+                {
+                    touchSize = tutorial.Canvas.GetComponent<RectTransform>().sizeDelta;
+                }
+                else if (interactive != null && interactive.GetComponent<RectTransform>() != null)
+                {
+                    touchSize = interactive.GetComponent<RectTransform>().sizeDelta;
+                }
                 touch.GetComponent<RectTransform>().sizeDelta = touchSize;
             }
 
@@ -214,6 +225,7 @@ namespace GameFoundation.Tutorial
             }
 
             tutorial.mask.SetActive(false);
+            tutorial.hand.GetComponent<Animator>().enabled = false;
             tutorial.hand.SetActive(false);
             tutorial.touch.onClick.RemoveAllListeners();
         }

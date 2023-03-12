@@ -63,7 +63,7 @@ namespace GameFoundation.Economy
         {
             onPurchaseBegin.Invoke();
 #if GF_IAP
-            var task = new UniTaskCompletionSource<bool>();
+            var task = new UniTaskCompletionSource<(bool, string)>();
             iapListener.Restore(task);
             await task.Task;
 #else

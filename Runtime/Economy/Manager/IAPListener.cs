@@ -82,9 +82,9 @@ namespace GameFoundation.Economy
             controller.InitiatePurchase(productID);
         }
 
-        public void Restore(UniTaskCompletionSource<bool> task)
-        {
-            GetStoreExtensions<IAppleExtensions>().RestoreTransactions((result) => task.TrySetResult(result));
+        public void Restore(UniTaskCompletionSource<(bool, string)> task)
+        {            
+            GetStoreExtensions<IAppleExtensions>().RestoreTransactions((result, msg) => task.TrySetResult((result, msg)));
         }
 
         public void OnInitialized(IStoreController controller, IExtensionProvider extensions)
@@ -92,6 +92,12 @@ namespace GameFoundation.Economy
             this.controller = controller;
             this.extensions = extensions;
             onIntialized.Invoke(true);
+        }
+
+        public void OnInitializeFailed(InitializationFailureReason error, string msg)
+        {
+            Debug.LogError(string.Format("Purchasing failed to initialize. Reason: {0}", msg));
+            onIntialized.Invoke(false);
         }
 
         public void OnInitializeFailed(InitializationFailureReason error)

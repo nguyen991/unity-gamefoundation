@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#if GF_FIREBASE
+using Firebase;
+using Firebase.Crashlytics;
+#endif
+
 namespace GameFoundation.Mobile
 {
     public static class FirebaseInstance
@@ -16,6 +21,7 @@ namespace GameFoundation.Mobile
                 if (dependencyStatus == Firebase.DependencyStatus.Available)
                 {
                     var app = Firebase.FirebaseApp.DefaultInstance;
+                    Crashlytics.ReportUncaughtExceptionsAsFatal = true;
                 }
                 else
                 {
