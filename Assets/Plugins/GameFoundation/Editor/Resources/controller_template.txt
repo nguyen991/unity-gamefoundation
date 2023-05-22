@@ -1,0 +1,22 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+[RequireComponent(typeof(__STATE_CONTROLLER__))]
+public class __CONTROLLER__ : MonoBehaviour
+{
+    private __MODEL__ model;
+    private __STATE_CONTROLLER__ controller;
+
+    private void Awake()
+    {
+        CreateModel();
+    }
+
+    private void CreateModel()
+    {
+        model = new __MODEL__();
+        model.Register(false, true);
+        controller.Model = model;
+    }
+}

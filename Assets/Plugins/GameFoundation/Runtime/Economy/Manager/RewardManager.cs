@@ -15,6 +15,7 @@ namespace GameFoundation.Economy
         {
             public int claimed = 0;
             public int step = 0;
+            public long firstClaimed = 0;
             public long lastClaimed = 0;
         }
 
@@ -36,8 +37,9 @@ namespace GameFoundation.Economy
             return catalog.Find(key);
         }
 
-        public List<RewardTableItem> Claim(string key, bool forceClaim = false)
+        public RewardTableItem Claim(string key, out int rewardTableIndex, bool forceClaim = false)
         {
+            rewardTableIndex = -1;
             if (IsClaimable(key) || forceClaim)
             {
                 Reward reward = Find(key);
@@ -47,7 +49,6 @@ namespace GameFoundation.Economy
                     if (!rewardsRecorded.TryGetValue(key, out RewardRecord record))
                     {
                         record = new RewardRecord();
-                        rewardsRecorded.Add(key, record);
                     };
 
                     // check if the reward table available
@@ -63,10 +64,20 @@ namespace GameFoundation.Economy
                         record.claimed += 1;
                         record.step += 1;
                     }
+
                     record.lastClaimed = DateTime.Now.Ticks;
+                    if (record.firstClaimed <= 0) {
+                        record.firstClaimed = record.lastClaimed;
+                    }
+                    
+                    // add record
+                    if (!rewardsRecorded.ContainsKey(key))
+                    {
+                        rewardsRecorded.Add(key, record);
+                    }
 
                     // grant rewards
-                    return GrantReward(reward, record.claimed);
+                    return GrantReward(reward, record.step - 1, out rewardTableIndex);
                 }
             }
             return null;
@@ -78,12 +89,14 @@ namespace GameFoundation.Economy
             return rewards.Select(it => reward.RewardTable.IndexOf(it)).ToList();
         }
 
-        private List<RewardTableItem> GrantReward(Reward reward, int claimed)
+        private RewardTableItem GrantReward(Reward reward, int index, out int rewardTableIndex)
         {
-            List<RewardTableItem> items = new List<RewardTableItem>();
+            RewardTableItem rewardItem = null;
+            rewardTableIndex = -1;
             if (reward.type == Reward.RewardType.Progressive)
             {
-                items.Add(reward.RewardTable[claimed - 1]);
+                rewardItem = reward.RewardTable[index];
+                rewardTableIndex = index;
             }
             else if (reward.type == Reward.RewardType.Randomized)
             {
@@ -92,7 +105,8 @@ namespace GameFoundation.Economy
                 {
                     if (r <= reward.RewardTable[i].percent)
                     {
-                        items.Add(reward.RewardTable[i]);
+                        rewardItem = reward.RewardTable[i];
+                        rewardTableIndex = i;
                         break;
                     }
                     r -= reward.RewardTable[i].percent;
@@ -100,13 +114,10 @@ namespace GameFoundation.Economy
             }
 
             // increase currency and inventory
-            items.ForEach(it =>
-            {
-                it.currencies.ForEach(c => wallet.Add(c.item.key, c.amount));
-                it.items.ForEach(i => inventory.Create(i.item.key, i.amount));
-            });
+            rewardItem.currencies.ForEach(c => wallet.Add(c.item.key, c.amount));
+            rewardItem.items.ForEach(i => inventory.Create(i.item.key, i.amount));
 
-            return items;
+            return rewardItem;
         }
 
         public bool IsClaimable(string key)
@@ -182,6 +193,26 @@ namespace GameFoundation.Economy
             return TimeSpan.Zero;
         }
 
+        public TimeSpan UtilExpire(string key)
+        {
+            ResetExpiredReward(key);
+            var reward = Find(key);
+            if (reward.expire.duration > 0 && rewardsRecorded.TryGetValue(key, out RewardRecord record))
+            {
+                long endTime = 0;
+                if (reward.expire.type == Reward.DurationTime.DurationType.Days)
+                {
+                    endTime = new DateTime(record.firstClaimed).Reset().AddDays(reward.expire.duration).Ticks;
+                }
+                else
+                {
+                    endTime = new DateTime(record.firstClaimed).AddMinutes(reward.expire.duration).Ticks;
+                }
+                return TimeSpan.FromTicks(endTime - DateTime.Now.Ticks);
+            }
+            return TimeSpan.Zero;
+        }
+
         public bool Reset(string key)
         {
             return rewardsRecorded.Remove(key);
@@ -191,7 +222,7 @@ namespace GameFoundation.Economy
         {
             var reward = Find(key);
             if (rewardsRecorded.TryGetValue(key, out RewardRecord record) &&
-                reward.expire.duration > 0 && IsExpireDuration(reward.expire, record.lastClaimed)
+                reward.expire.duration > 0 && IsExpireDuration(reward.expire, record.firstClaimed)
             )
             {
                 Reset(key);

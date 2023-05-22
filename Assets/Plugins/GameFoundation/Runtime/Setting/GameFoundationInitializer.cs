@@ -5,9 +5,11 @@ using Cysharp.Threading.Tasks;
 using GameFoundation.Addressable;
 using GameFoundation.State;
 using GameFoundation.Utilities;
-using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.Events;
+using Unity.Services.Core;
+using Unity.Services.Core.Environments;
+using NaughtyAttributes;
 
 #if UNITY_IOS
 using Unity.Notifications.iOS;
@@ -19,6 +21,11 @@ namespace GameFoundation
     {
         [Tooltip("If null, if will try to load from resources folder at start")]
         public GameFoundationSetting setting;
+
+        [Header("Unity Services")]
+        public bool enableUnityServices = false;
+        [ShowIf("enableUnityServices")]
+        public string environment = "production";
 
         [Space(10)]
         [Header("Callback")]
@@ -38,6 +45,13 @@ namespace GameFoundation
             InitNotification();
 
             await UniTask.NextFrame();
+
+            // init game service
+            if (enableUnityServices)
+            {
+                var options = new InitializationOptions().SetEnvironmentName(environment);
+                await UnityServices.InitializeAsync(options);
+            }
 
             // load setting
             if (setting == null)
@@ -181,7 +195,7 @@ namespace GameFoundation
 
         private void OnApplicationFocus(bool focus)
         {
-            if (!focus && setting.saveOnLostFocus)
+            if (Initialized && !focus && setting.saveOnLostFocus)
             {
                 Economy.EconomyManager.Instance.Save();
                 Repository.Instance.SaveAll();
@@ -190,7 +204,7 @@ namespace GameFoundation
 
         private void OnApplicationPause(bool pause)
         {
-            if (pause && setting.saveOnLostFocus)
+            if (Initialized && pause && setting.saveOnLostFocus)
             {
                 Economy.EconomyManager.Instance.Save();
                 Repository.Instance.SaveAll();

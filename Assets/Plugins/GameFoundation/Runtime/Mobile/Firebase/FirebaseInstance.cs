@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
+#if GF_FIREBASE
+using Firebase;
+using Firebase.Crashlytics;
+#endif
+
 namespace GameFoundation.Mobile
 {
     public static class FirebaseInstance
@@ -16,6 +21,7 @@ namespace GameFoundation.Mobile
                 if (dependencyStatus == Firebase.DependencyStatus.Available)
                 {
                     var app = Firebase.FirebaseApp.DefaultInstance;
+                    Crashlytics.ReportUncaughtExceptionsAsFatal = true;
                 }
                 else
                 {
@@ -28,8 +34,6 @@ namespace GameFoundation.Mobile
 
         public static void Log(string eventName, params Mobile.LogEvent.Parameter[] parameters)
         {
-            Debug.Log($"----[Tracking]: {eventName}\n{string.Join("\n", parameters.Select(p => $"{p.name}={p.ToString()}"))}");
-
 #if GF_FIREBASE
             var fb_params = new List<Firebase.Analytics.Parameter>();
             foreach (var value in parameters)
@@ -39,7 +43,7 @@ namespace GameFoundation.Mobile
             Firebase.Analytics.FirebaseAnalytics.LogEvent(eventName, fb_params.ToArray());
 
             // AppsFlyer
-            AppsFlyerSDK.AppsFlyer.sendEvent(eventName, ap_params);
+            // AppsFlyerSDK.AppsFlyer.sendEvent(eventName, ap_params);
 #endif
         }
 

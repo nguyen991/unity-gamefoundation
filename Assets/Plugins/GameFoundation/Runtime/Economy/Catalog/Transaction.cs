@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 #if GF_IAP
@@ -20,6 +21,11 @@ namespace GameFoundation.Economy
     {
         public List<TransactionItem<Currency>> currencies = new List<TransactionItem<Currency>>();
         public List<TransactionItem<Item>> items = new List<TransactionItem<Item>>();
+        public List<TransactionItem<CatalogItem>> rewards => 
+            currencies.Select(c => new TransactionItem<CatalogItem>() { item = c.item, amount = c.amount })
+            .Concat(items.Select(c => new TransactionItem<CatalogItem>() { item = c.item, amount = c.amount }))
+            .ToList();
+
         public string adsId;
         public string productId;
 

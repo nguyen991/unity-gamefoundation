@@ -2,7 +2,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Cysharp.Threading.Tasks;
-using NaughtyAttributes;
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 
@@ -15,7 +14,7 @@ namespace GameFoundation.Pool
 
         [SerializeField] private int defaultAddressesSize = 10;
         [SerializeField] private List<AssetLabelReference> addresses;
-        
+
         [SerializeField] private GenericDictionary<string, PoolNode> pools = new GenericDictionary<string, PoolNode>();
 
         private async UniTaskVoid Start()
@@ -60,9 +59,9 @@ namespace GameFoundation.Pool
         public void Return(Transform node)
         {
             var poolRef = node.GetComponent<PoolingRef>();
-            if (poolRef)
+            if (poolRef == null)
             {
-                Debug.LogError($"{node.name} is not in pool {poolRef.poolId}");
+                Debug.LogError($"{node.name} is not have PoolingRef");
             }
             else
             {
@@ -84,7 +83,7 @@ namespace GameFoundation.Pool
                 node.gameObject.SetActive(false);
                 node.SetParent(transform);
                 pool.Return(node.gameObject);
-            }                
+            }
         }
 
         public void Return(string id, GameObject node)

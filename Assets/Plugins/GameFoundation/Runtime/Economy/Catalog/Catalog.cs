@@ -10,17 +10,27 @@ namespace GameFoundation.Economy
         [Header("Basic")]
         public string key;
         public string display;
-        public List<string> tags;
-        public GenericDictionary<string, Property> properties;
+        public List<string> tags = new List<string>();
+        public GenericDictionary<string, Property> properties = new GenericDictionary<string, Property>();
 
         public bool IsHaveTag(string tag)
         {
-            return tags.Contains(tag);
+            return tags != null && tags.Contains(tag);
         }
 
-        public bool IsHaveProperty(string prop)
+        public bool IsHaveProperty(string key)
         {
-            return properties.ContainsKey(prop);
+            return properties != null && properties.ContainsKey(key);
+        }
+
+        public bool TryGetProperty(string key, out Property prop)
+        {
+            return properties.TryGetValue(key, out prop);
+        }
+
+        public Property GetProperty(string key)
+        {
+            return properties.ContainsKey(key) ? properties[key] : null;
         }
     }
 

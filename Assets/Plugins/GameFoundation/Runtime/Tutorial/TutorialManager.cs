@@ -5,6 +5,7 @@ using UniRx;
 using Cysharp.Threading.Tasks;
 using UnityEngine.UI;
 using System.Collections.Generic;
+using TMPro;
 
 namespace GameFoundation.Tutorial
 {
@@ -15,9 +16,11 @@ namespace GameFoundation.Tutorial
 
         [Header("Default Tutorial Renderer")]
         public GameObject hand;
-        public AnimationClip handClip;
+        public string handClip;
         public Button touch;
         public GameObject mask;
+        public GameObject messageBox;
+        public string messageBoxClip;
         public bool isPersistent = true;
 
         public Canvas Canvas { get; private set; }
@@ -47,6 +50,7 @@ namespace GameFoundation.Tutorial
             // subscribe events
             Model.active.Where(id => !Model.IsCompleted(id)).Subscribe(Active);
             Model.nextStep.Subscribe(_ => NextStep()).AddTo(this);
+            Model.showMessage.Subscribe(p => ShowMessageBox(p.text, p.clip, p.anchorPosition)).AddTo(this);
         }
 
         private void Active(string id)
@@ -69,7 +73,23 @@ namespace GameFoundation.Tutorial
             Canvas.enabled = false;
             Model.completed.Add(tut.id);
             Model.active.Value = "";
+            Model.onCompleted.Execute(tut.id);
             currentTutorial = null;
+        }
+
+        public void ShowMessageBox(string text, string clip, Vector2 anchorPosition)
+        {
+            messageBox.GetComponent<RectTransform>().anchoredPosition = anchorPosition;
+            messageBox.SetActive(true);
+            messageBox.GetComponentInChildren<TextMeshProUGUI>().text = text;
+
+            // play animation
+            var anim = messageBox.GetComponent<Animator>();
+            var animClip = string.IsNullOrEmpty(clip) ? messageBoxClip : clip;
+            if (anim != null)
+            {
+                anim.Play(animClip);
+            }
         }
     }
 }

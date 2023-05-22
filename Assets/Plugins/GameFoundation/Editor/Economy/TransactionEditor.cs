@@ -147,7 +147,7 @@ namespace GameFoundation.Editor.Economy
             items.ForEach(item =>
             {
                 GUILayout.BeginHorizontal("HelpBox", GUILayout.MaxWidth(layoutWidth));
-                GUILayout.Label(item.item.key, GUILayout.MaxWidth(50));
+                GUILayout.Label(item.item.key); //, GUILayout.MaxWidth(50));
                 GUILayout.FlexibleSpace();
                 item.amount = EditorGUILayout.LongField(item.amount, GUILayout.MaxWidth(100));
                 if (GUILayout.Button(EditorGUIUtility.IconContent("d_TreeEditor.Trash"), GUILayout.MaxWidth(30)))

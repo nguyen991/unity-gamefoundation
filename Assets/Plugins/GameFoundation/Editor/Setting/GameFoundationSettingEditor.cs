@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEditor;
+using Unity.EditorCoroutines.Editor;
 using GameFoundation;
 using UnityEditor.Compilation;
 using GameFoundation.Economy;
@@ -14,10 +15,15 @@ namespace GameFoundation.Editor
     {
         private GameFoundationSetting setting = null;
         private static SerializedObject serializedObject;
-        private List<BuildTargetGroup> targetGroup = new List<BuildTargetGroup>()
+        private List<BuildTargetGroup> allPlatformGroup = new List<BuildTargetGroup>()
         {
             BuildTargetGroup.Standalone,
             BuildTargetGroup.WebGL,
+            BuildTargetGroup.Android,
+            BuildTargetGroup.iOS,
+        };
+        private List<BuildTargetGroup> mobileGroup = new List<BuildTargetGroup>()
+        {
             BuildTargetGroup.Android,
             BuildTargetGroup.iOS,
         };
@@ -100,11 +106,11 @@ namespace GameFoundation.Editor
                 {
                     if (value)
                     {
-                        AddSymbol("GF_ADS", targetGroup);
+                        AddSymbol("GF_ADS", mobileGroup);
                     }
                     else
                     {
-                        RemoveSymbol("GF_ADS", targetGroup);
+                        RemoveSymbol("GF_ADS", mobileGroup);
                     }
                     setting.enableAds = value;
                 }
@@ -117,11 +123,11 @@ namespace GameFoundation.Editor
                 {
                     if (value)
                     {
-                        AddSymbol("GF_FIREBASE", targetGroup);
+                        AddSymbol("GF_FIREBASE", mobileGroup);
                     }
                     else
                     {
-                        RemoveSymbol("GF_FIREBASE", targetGroup);
+                        RemoveSymbol("GF_FIREBASE", mobileGroup);
                     }
                     setting.enableFirebase = value;
                 }
@@ -134,11 +140,11 @@ namespace GameFoundation.Editor
                 {
                     if (value)
                     {
-                        AddSymbol("GF_IAP", targetGroup);
+                        AddSymbol("GF_IAP", allPlatformGroup);
                     }
                     else
                     {
-                        RemoveSymbol("GF_IAP", targetGroup);
+                        RemoveSymbol("GF_IAP", allPlatformGroup);
                     }
                     setting.enableIap = value;
                 }
@@ -151,11 +157,11 @@ namespace GameFoundation.Editor
                 {
                     if (value)
                     {
-                        AddSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroup);
+                        AddSymbol("UNITASK_DOTWEEN_SUPPORT", allPlatformGroup);
                     }
                     else
                     {
-                        RemoveSymbol("UNITASK_DOTWEEN_SUPPORT", targetGroup);
+                        RemoveSymbol("UNITASK_DOTWEEN_SUPPORT", allPlatformGroup);
                     }
                     setting.enableDotween = value;
                 }
@@ -220,13 +226,36 @@ namespace GameFoundation.Editor
 
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
             EditorGUILayout.LabelField("Economy", EditorStyles.boldLabel);
+            EditorGUILayout.BeginHorizontal();
             setting.economyData = EditorGUILayout.ObjectField("Economy Data", setting.economyData, typeof(EconomyData), false) as EconomyData;
+            if (setting.economyData == null && GUILayout.Button("Create", GUILayout.Width(60)))
+            {
+                EditorApplication.ExecuteMenuItem("Game Foundation/Economy");
+                EditorCoroutineUtility.StartCoroutine(LoadEconomyData(), this);
+            }
+            else if (setting.economyData != null && GUILayout.Button("Edit", GUILayout.Width(60)))
+            {
+                EditorApplication.ExecuteMenuItem("Game Foundation/Economy");
+            }
+            EditorGUILayout.EndHorizontal();
             setting.dataLayerType = (DataLayerType)EditorGUILayout.EnumPopup("Data Layer", setting.dataLayerType);
             setting.saveOnLostFocus = EditorGUILayout.Toggle("Save On Lost Focus", setting.saveOnLostFocus);
 
             EditorGUILayout.Space(EditorGUIUtility.singleLineHeight);
             EditorGUILayout.LabelField("Sprite Atlas", EditorStyles.boldLabel);
             EditorGUILayout.PropertyField(serializedObject.FindProperty("spriteAtlasLabels"), true);
+        }
+
+        private IEnumerator LoadEconomyData()
+        {
+            yield return new EditorWaitForSeconds(0.1f);
+            var guids = AssetDatabase.FindAssets("t:EconomyData");
+            if (guids.Length > 0)
+            {
+                var path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                setting.economyData = AssetDatabase.LoadAssetAtPath<EconomyData>(path);
+            }
+            Repaint();
         }
     }
 }

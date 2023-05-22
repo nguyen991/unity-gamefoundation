@@ -1,0 +1,10 @@
+using System.Collections;
+using System.Collections.Generic;
+using GameFoundation.State;
+using UnityEngine;
+
+[CreateAssetMenu(menuName = "__STATE__/__STATE_SCRIPT_ID__", fileName = "__STATE____STATE_SCRIPT_ID__")]
+public class __STATE____STATE_SCRIPT_ID__ : __STATE__
+{
+    public override __STATE_ID__ ID => __STATE_ID__.__STATE_SCRIPT_ID__;
+}

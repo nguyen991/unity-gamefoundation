@@ -20,6 +20,7 @@ namespace GameFoundation.Utilities
         }
 
         public Platform platform = Platform.Editor;
+        public bool destroyGameObject = true;
 
         private void Awake()
         {
@@ -46,7 +47,10 @@ namespace GameFoundation.Utilities
             }
             if (!result && platform != Platform.Other)
             {
-                Destroy(gameObject);
+                if (destroyGameObject)
+                    Destroy(gameObject);
+                else
+                    gameObject.SetActive(false);
             }
         }
     }
